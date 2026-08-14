@@ -8,3 +8,6 @@ dist/
 
 # Intermediário gerado pelo build do PDF (mantemos o .pdf e o .png como entregáveis)
 docs/google-ads-api-design-doc.print.html
+
+.vercel
+.env*
