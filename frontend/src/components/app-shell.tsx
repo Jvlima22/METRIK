@@ -5,6 +5,7 @@ import {
   Activity,
   Megaphone,
   Images,
+  CreditCard,
   Search,
   Bell,
   PanelLeftClose,
@@ -55,6 +56,7 @@ const navSections: { group: string; items: NavItem[] }[] = [
     items: [
       { to: "/manage", label: "Campanhas", icon: Megaphone },
       { to: "/creatives", label: "Criativos", icon: Images },
+{ to: "/subscriptions", label: "Assinaturas", icon: CreditCard },
     ],
   },
 ];

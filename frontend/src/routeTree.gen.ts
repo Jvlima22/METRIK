@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ViolationsRouteImport } from './routes/violations'
+import { Route as SubscriptionsRouteImport } from './routes/subscriptions'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as JobsRouteImport } from './routes/jobs'
@@ -24,6 +25,11 @@ import { Route as CampaignsCampaignIdRouteImport } from './routes/campaigns.$cam
 const ViolationsRoute = ViolationsRouteImport.update({
   id: '/violations',
   path: '/violations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SubscriptionsRoute = SubscriptionsRouteImport.update({
+  id: '/subscriptions',
+  path: '/subscriptions',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegisterRoute = RegisterRouteImport.update({
@@ -85,6 +91,7 @@ export interface FileRoutesByFullPath {
   '/jobs': typeof JobsRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/subscriptions': typeof SubscriptionsRoute
   '/violations': typeof ViolationsRoute
   '/campaigns/$campaignId': typeof CampaignsCampaignIdRoute
   '/manage/$campaignId': typeof ManageCampaignIdRoute
@@ -98,6 +105,7 @@ export interface FileRoutesByTo {
   '/jobs': typeof JobsRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/subscriptions': typeof SubscriptionsRoute
   '/violations': typeof ViolationsRoute
   '/campaigns/$campaignId': typeof CampaignsCampaignIdRoute
   '/manage/$campaignId': typeof ManageCampaignIdRoute
@@ -112,6 +120,7 @@ export interface FileRoutesById {
   '/jobs': typeof JobsRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/subscriptions': typeof SubscriptionsRoute
   '/violations': typeof ViolationsRoute
   '/campaigns/$campaignId': typeof CampaignsCampaignIdRoute
   '/manage/$campaignId': typeof ManageCampaignIdRoute
@@ -127,6 +136,7 @@ export interface FileRouteTypes {
     | '/jobs'
     | '/login'
     | '/register'
+    | '/subscriptions'
     | '/violations'
     | '/campaigns/$campaignId'
     | '/manage/$campaignId'
@@ -140,6 +150,7 @@ export interface FileRouteTypes {
     | '/jobs'
     | '/login'
     | '/register'
+    | '/subscriptions'
     | '/violations'
     | '/campaigns/$campaignId'
     | '/manage/$campaignId'
@@ -153,6 +164,7 @@ export interface FileRouteTypes {
     | '/jobs'
     | '/login'
     | '/register'
+    | '/subscriptions'
     | '/violations'
     | '/campaigns/$campaignId'
     | '/manage/$campaignId'
@@ -167,6 +179,7 @@ export interface RootRouteChildren {
   JobsRoute: typeof JobsRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
+  SubscriptionsRoute: typeof SubscriptionsRoute
   ViolationsRoute: typeof ViolationsRoute
   CampaignsCampaignIdRoute: typeof CampaignsCampaignIdRoute
   ManageCampaignIdRoute: typeof ManageCampaignIdRoute
@@ -180,6 +193,13 @@ declare module '@tanstack/react-router' {
       path: '/violations'
       fullPath: '/violations'
       preLoaderRoute: typeof ViolationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/subscriptions': {
+      id: '/subscriptions'
+      path: '/subscriptions'
+      fullPath: '/subscriptions'
+      preLoaderRoute: typeof SubscriptionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/register': {
@@ -263,6 +283,7 @@ const rootRouteChildren: RootRouteChildren = {
   JobsRoute: JobsRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
+  SubscriptionsRoute: SubscriptionsRoute,
   ViolationsRoute: ViolationsRoute,
   CampaignsCampaignIdRoute: CampaignsCampaignIdRoute,
   ManageCampaignIdRoute: ManageCampaignIdRoute,
