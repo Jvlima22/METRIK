@@ -1,6 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+﻿import { createFileRoute } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   Area,
   Bar,
@@ -16,7 +16,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { MousePointerClick, DollarSign, Target, Zap, TrendingUp, Heart, MessageCircle, ShieldCheck, Sparkles, ArrowRight, Pause } from "lucide-react";
+import { MousePointerClick, DollarSign, Target, Zap, TrendingUp, Heart, MessageCircle, ShieldCheck, Sparkles, ArrowRight, Pause, Download } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/app-shell";
 import { GlassCard } from "@/components/glass-card";
@@ -65,6 +65,65 @@ export const Route = createFileRoute("/dashboard")({
   component: DashboardPage,
 });
 
+
+async function exportNodeAsImage(node: HTMLElement, format: "png" | "jpg", filename: string) {
+  const rect = node.getBoundingClientRect();
+  const clone = node.cloneNode(true) as HTMLElement;
+  clone.querySelectorAll("[data-export-ignore]").forEach((element) => element.remove());
+
+  const copyComputedStyles = (source: Element, target: Element) => {
+    const sourceStyle = window.getComputedStyle(source);
+    const targetElement = target as HTMLElement;
+    for (let index = 0; index < sourceStyle.length; index += 1) {
+      const property = sourceStyle.item(index);
+      targetElement.style.setProperty(property, sourceStyle.getPropertyValue(property), sourceStyle.getPropertyPriority(property));
+    }
+    Array.from(source.children).forEach((child, index) => {
+      const targetChild = target.children[index];
+      if (targetChild) copyComputedStyles(child, targetChild);
+    });
+  };
+
+  copyComputedStyles(node, clone);
+  const wrapper = document.createElement("div");
+  wrapper.style.cssText = "position:fixed;left:-100000px;top:0;pointer-events:none;background:#ffffff;";
+  wrapper.appendChild(clone);
+  document.body.appendChild(wrapper);
+
+  try {
+    const width = Math.ceil(rect.width);
+    const height = Math.ceil(rect.height);
+    const serialized = new XMLSerializer().serializeToString(clone);
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xhtml="http://www.w3.org/1999/xhtml" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><foreignObject width="100%" height="100%"><xhtml:div xmlns="http://www.w3.org/1999/xhtml">${serialized}</xhtml:div></foreignObject></svg>`;
+    const image = new Image();
+    image.decoding = "async";
+    image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+    await new Promise<void>((resolve, reject) => {
+      image.onload = () => resolve();
+      image.onerror = () => reject(new Error("NÃ£o foi possÃ­vel renderizar o card para exportaÃ§Ã£o."));
+    });
+
+    const scale = 2;
+    const canvas = document.createElement("canvas");
+    canvas.width = width * scale;
+    canvas.height = height * scale;
+    const context = canvas.getContext("2d");
+    if (!context) throw new Error("Canvas indisponÃ­vel para exportaÃ§Ã£o.");
+    context.scale(scale, scale);
+    context.fillStyle = "#ffffff";
+    context.fillRect(0, 0, width, height);
+    context.drawImage(image, 0, 0, width, height);
+
+    const mime = format === "png" ? "image/png" : "image/jpeg";
+    const dataUrl = canvas.toDataURL(mime, 0.95);
+    const link = document.createElement("a");
+    link.download = `${filename}.${format}`;
+    link.href = dataUrl;
+    link.click();
+  } finally {
+    wrapper.remove();
+  }
+}
 const PIE_COLORS = ["#6d28d9", "#2563eb", "#06b6d4"];
 
 /** YYYY-MM-DD de N dias atrás — default do filtro de data (alinhado ao mockTrend). */
@@ -111,6 +170,8 @@ function DashboardPage() {
   // apply a deterministic per-account scale so switching accounts changes the
   // numbers (pure mock — no real API call).
   const { activeAccount } = useAccount();
+  const performanceCardRef = useRef<HTMLDivElement>(null);
+  const [exportingPerformance, setExportingPerformance] = useState(false);
   const accountPlatform = PLATFORM_DATA_KEY[activeAccount.platform];
   const scale = accountScale(activeAccount.accountId);
 
@@ -146,6 +207,16 @@ function DashboardPage() {
     () => scopedTrend.filter((d) => (!from || d.iso >= from) && (!to || d.iso <= to)),
     [scopedTrend, from, to],
   );
+
+  const handlePerformanceExport = async (format: "png" | "jpg") => {
+    if (!performanceCardRef.current) return;
+    setExportingPerformance(true);
+    try {
+      await exportNodeAsImage(performanceCardRef.current, format, `metrik-performance-${activeAccount.accountId}`);
+    } finally {
+      setExportingPerformance(false);
+    }
+  };
 
   const rows = useMemo(
     () => scopedCampaigns.map((c) => ({ c, cr: getCreative(c.campaignId) })),
@@ -338,7 +409,7 @@ function DashboardPage() {
 
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <GlassCard className="p-5 lg:col-span-2">
+          <GlassCard ref={performanceCardRef} className="p-5 lg:col-span-2">
             <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
               <div>
                 <h3 className="font-display font-semibold text-base">Performance & Engajamento</h3>
@@ -348,6 +419,14 @@ function DashboardPage() {
                 <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-[#6d28d9]" />Impressões</span>
                 <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-[#06b6d4]" />Cliques</span>
                 <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-[#f43f5e]" />Engajamento</span>
+                <div data-export-ignore="true" className="flex items-center gap-1.5 sm:ml-2">
+                  <Button type="button" variant="outline" size="sm" className="h-8 px-2.5 text-[11px]" onClick={() => void handlePerformanceExport("png")} disabled={exportingPerformance}>
+                    <Download className="mr-1.5 h-3.5 w-3.5" /> PNG
+                  </Button>
+                  <Button type="button" variant="outline" size="sm" className="h-8 px-2.5 text-[11px]" onClick={() => void handlePerformanceExport("jpg")} disabled={exportingPerformance}>
+                    <Download className="mr-1.5 h-3.5 w-3.5" /> JPG
+                  </Button>
+                </div>
               </div>
             </div>
             <ResponsiveContainer width="100%" height={280}>
@@ -366,9 +445,9 @@ function DashboardPage() {
                 <XAxis dataKey="date" stroke="#9aa3b2" fontSize={11} tickLine={false} axisLine={false} />
                 <YAxis stroke="#9aa3b2" fontSize={11} tickLine={false} axisLine={false} />
                 <Tooltip contentStyle={{ background: "#fff", border: "1px solid #e6e8ef", borderRadius: 10, fontSize: 12, boxShadow: "0 8px 24px rgba(15,18,40,0.08)" }} />
-                <Area type="monotone" dataKey="impressions" stroke="#6d28d9" strokeWidth={2} fill="url(#gradImp)" />
-                <Area type="monotone" dataKey="clicks" stroke="#06b6d4" strokeWidth={2} fill="url(#gradClk)" />
-                <Line type="monotone" dataKey="engagement" stroke="#f43f5e" strokeWidth={2.5} dot={false} />
+                <Area yAxisId="impressions" type="monotone" dataKey="impressions" stroke="#6d28d9" strokeWidth={2} fill="url(#gradImp)" />
+                <Line yAxisId="secondary" type="monotone" dataKey="clicks" stroke="#06b6d4" strokeWidth={2.5} dot={false} activeDot={{ r: 4 }} />
+                <Line yAxisId="secondary" type="monotone" dataKey="engagement" stroke="#f43f5e" strokeWidth={2.5} dot={false} activeDot={{ r: 4 }} />
               </ComposedChart>
             </ResponsiveContainer>
           </GlassCard>
@@ -489,3 +568,4 @@ function DashboardPage() {
     </AppShell>
   );
 }
+
