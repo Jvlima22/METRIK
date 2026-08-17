@@ -1,41 +1,27 @@
-import express from 'express';
-import cors from 'cors';
+﻿import { app } from '../app';
 import { env } from '../config/env';
-import { errorHandler } from '../middlewares/error.middleware';
-import routes from '../routes';
 import { startTakedownWorker } from '../workers/takedown.worker';
 import { redisConnection } from '../queues/redis';
 import { takedownQueue } from '../queues/takedown.queue';
 
-const app = express();
+export { app };
 
-app.use(cors({ origin: env.FRONTEND_ORIGIN }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+if (process.env.VERCEL !== '1') {
+  const worker = startTakedownWorker();
 
-app.get('/health', (_req, res) => {
-  res.json({ status: 'ok', env: env.NODE_ENV, ts: new Date().toISOString() });
-});
+  async function shutdown(signal: string): Promise<void> {
+    console.log(`[${signal}] encerrando...`);
+    await worker.close();
+    await takedownQueue.close();
+    await redisConnection.quit();
+    process.exit(0);
+  }
 
-app.use(routes);
+  process.on('SIGINT', () => void shutdown('SIGINT'));
+  process.on('SIGTERM', () => void shutdown('SIGTERM'));
 
-app.use(errorHandler);
-
-const worker = startTakedownWorker();
-
-const server = app.listen(env.PORT, () => {
-  console.log(`API rodando na porta ${env.PORT} [${env.NODE_ENV}]`);
-  console.log(`Worker "takedown" iniciado — plataformas: GOOGLE_ADS, META_ADS`);
-});
-
-async function shutdown(signal: string): Promise<void> {
-  console.log(`\n[${signal}] encerrando...`);
-  server.close();
-  await worker.close();
-  await takedownQueue.close();
-  await redisConnection.quit();
-  process.exit(0);
+  app.listen(env.PORT, () => {
+    console.log(`API rodando na porta ${env.PORT} [${env.NODE_ENV}]`);
+    console.log('Worker takedown iniciado');
+  });
 }
-
-process.on('SIGINT', () => void shutdown('SIGINT'));
-process.on('SIGTERM', () => void shutdown('SIGTERM'));

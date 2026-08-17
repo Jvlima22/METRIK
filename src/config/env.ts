@@ -1,4 +1,4 @@
-import { z } from 'zod';
+﻿import { z } from 'zod';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -16,19 +16,19 @@ const envSchema = z.object({
     .default('3')
     .transform((v) => Number(v)),
 
-  // Supabase — provê a autenticação (GoTrue) e a base de usuários (Postgres).
-  // Opcionais no boot, no mesmo espírito das credenciais de plataforma: a API
+  // Supabase â€” provÃª a autenticaÃ§Ã£o (GoTrue) e a base de usuÃ¡rios (Postgres).
+  // Opcionais no boot, no mesmo espÃ­rito das credenciais de plataforma: a API
   // sobe sem elas. O middleware `requireAuth` retorna 500 com erro claro se uma
-  // rota protegida for acessada sem essas variáveis configuradas.
+  // rota protegida for acessada sem essas variÃ¡veis configuradas.
   SUPABASE_URL: z.string().url().optional(),
   SUPABASE_ANON_KEY: z.string().optional(),
 
-  // Service role key (SECRETA — nunca exposta ao browser). Usada só no backend
+  // Service role key (SECRETA â€” nunca exposta ao browser). Usada sÃ³ no backend
   // para a admin API de convites (inviteUserByEmail). Opcional no boot.
   SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
 
   // Allowlist de e-mails que podem enviar convites de cadastro. Lista separada
-  // por vírgula. Vazia = ninguém convida (sistema fechado até configurar).
+  // por vÃ­rgula. Vazia = ninguÃ©m convida (sistema fechado atÃ© configurar).
   INVITE_ADMINS: z
     .string()
     .default('')
@@ -40,7 +40,7 @@ const envSchema = z.object({
     ),
 
   // Origem do frontend liberada no CORS + base do link de convite. O dev server
-  // (vite-config da Lovable) roda em :8080 por padrão.
+  // (vite-config da Lovable) roda em :8080 por padrÃ£o.
   FRONTEND_ORIGIN: z.string().url().default('http://localhost:8080'),
 
   // Credenciais das plataformas. Opcionais no boot: a API sobe sem elas.
@@ -55,14 +55,19 @@ const envSchema = z.object({
   META_ADS_ACCESS_TOKEN: z.string().optional(),
   META_ADS_APP_ID: z.string().optional(),
   META_ADS_APP_SECRET: z.string().optional(),
+  CAKTO_CLIENT_ID: z.string().optional(),
+  CAKTO_CLIENT_SECRET: z.string().optional(),
+  CAKTO_WEBHOOK_SECRET: z.string().optional(),
+  CAKTO_API_BASE_URL: z.string().url().default('https://api.cakto.com.br'),
 });
 
 const parsed = envSchema.safeParse(process.env);
 
 if (!parsed.success) {
-  console.error('Variáveis de ambiente inválidas:');
+  console.error('VariÃ¡veis de ambiente invÃ¡lidas:');
   console.error(parsed.error.flatten().fieldErrors);
   process.exit(1);
 }
 
 export const env = parsed.data;
+
