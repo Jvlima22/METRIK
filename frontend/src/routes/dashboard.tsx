@@ -410,81 +410,28 @@ function DashboardPage() {
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <GlassCard ref={performanceCardRef} className="p-5 lg:col-span-2">
-            <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
-              <div>
-                <h3 className="font-display font-semibold text-base">Performance & Engajamento</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">Cruzando mídia paga com sinais sociais · 14 dias</p>
+            <div className="mb-5 space-y-3">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h3 className="font-display font-semibold text-base">Performance & Engajamento</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">Cruzando mÃ­dia paga com sinais sociais Â· 14 dias</p>
+                </div>
+                <div data-export-ignore="true" className="flex shrink-0 items-center gap-2">
+                  <Button type="button" variant="outline" size="sm" className="h-8 border-slate-300 bg-white px-3 text-[11px] font-semibold text-slate-700 shadow-sm hover:bg-slate-50" onClick={() => void handlePerformanceExport("png")} disabled={exportingPerformance}>
+                    <Download className="mr-1.5 h-3.5 w-3.5" /> Exportar PNG
+                  </Button>
+                  <Button type="button" variant="outline" size="sm" className="h-8 border-slate-300 bg-white px-3 text-[11px] font-semibold text-slate-700 shadow-sm hover:bg-slate-50" onClick={() => void handlePerformanceExport("jpg")} disabled={exportingPerformance}>
+                    <Download className="mr-1.5 h-3.5 w-3.5" /> Exportar JPG
+                  </Button>
+                </div>
               </div>
-              <div className="flex items-center gap-3 text-xs">
-                <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-[#6d28d9]" />Impressões</span>
+              <div className="flex flex-wrap items-center gap-3 text-xs">
+                <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-[#6d28d9]" />ImpressÃµes</span>
                 <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-[#06b6d4]" />Cliques</span>
                 <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-[#f43f5e]" />Engajamento</span>
-                <div data-export-ignore="true" className="flex items-center gap-1.5 sm:ml-2">
-                  <Button type="button" variant="outline" size="sm" className="h-8 px-2.5 text-[11px]" onClick={() => void handlePerformanceExport("png")} disabled={exportingPerformance}>
-                    <Download className="mr-1.5 h-3.5 w-3.5" /> PNG
-                  </Button>
-                  <Button type="button" variant="outline" size="sm" className="h-8 px-2.5 text-[11px]" onClick={() => void handlePerformanceExport("jpg")} disabled={exportingPerformance}>
-                    <Download className="mr-1.5 h-3.5 w-3.5" /> JPG
-                  </Button>
-                </div>
               </div>
             </div>
-            <ResponsiveContainer width="100%" height={280}>
-              <ComposedChart data={filteredTrend} margin={{ left: -10, right: 8, top: 8 }}>
-                <defs>
-                  <linearGradient id="gradImp" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#6d28d9" stopOpacity={0.25} />
-                    <stop offset="100%" stopColor="#6d28d9" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="gradClk" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#06b6d4" stopOpacity={0.25} />
-                    <stop offset="100%" stopColor="#06b6d4" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#eef0f5" vertical={false} />
-                <XAxis dataKey="date" stroke="#9aa3b2" fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis stroke="#9aa3b2" fontSize={11} tickLine={false} axisLine={false} />
-                <Tooltip contentStyle={{ background: "#fff", border: "1px solid #e6e8ef", borderRadius: 10, fontSize: 12, boxShadow: "0 8px 24px rgba(15,18,40,0.08)" }} />
-                <Area yAxisId="impressions" type="monotone" dataKey="impressions" stroke="#6d28d9" strokeWidth={2} fill="url(#gradImp)" />
-                <Line yAxisId="secondary" type="monotone" dataKey="clicks" stroke="#06b6d4" strokeWidth={2.5} dot={false} activeDot={{ r: 4 }} />
-                <Line yAxisId="secondary" type="monotone" dataKey="engagement" stroke="#f43f5e" strokeWidth={2.5} dot={false} activeDot={{ r: 4 }} />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </GlassCard>
-
-          <GlassCard className="p-5">
-            <div className="mb-5">
-              <h3 className="font-display font-semibold text-base">Mix de dispositivos</h3>
-              <p className="text-xs text-muted-foreground mt-0.5">Distribuição de cliques</p>
-            </div>
-            <ResponsiveContainer width="100%" height={200}>
-              <PieChart>
-                <Pie data={deviceMix} dataKey="value" innerRadius={55} outerRadius={80} paddingAngle={2}>
-                  {deviceMix.map((_, i) => <Cell key={i} fill={PIE_COLORS[i]} />)}
-                </Pie>
-                <Tooltip contentStyle={{ background: "#fff", border: "1px solid #e6e8ef", borderRadius: 10, fontSize: 12 }} />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="space-y-2 mt-2">
-              {deviceMix.map((d, i) => (
-                <div key={d.name} className="flex items-center justify-between text-sm">
-                  <span className="flex items-center gap-2">
-                    <span className="size-2 rounded-full" style={{ background: PIE_COLORS[i] }} />
-                    {d.name}
-                  </span>
-                  <span className="font-medium tabular-nums">{d.value}%</span>
-                </div>
-              ))}
-            </div>
-          </GlassCard>
-        </div>
-
-        <GlassCard className="p-5">
-          <div className="mb-5">
-            <h3 className="font-display font-semibold text-base">Custo × Conversões por campanha</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">Eficiência relativa do investimento</p>
-          </div>
-          <ResponsiveContainer width="100%" height={240}>
+            <ResponsiveContainer width="100%" height={240}>
             <BarChart data={costByCampaign} margin={{ left: -10, right: 8 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#eef0f5" vertical={false} />
               <XAxis dataKey="name" stroke="#9aa3b2" fontSize={11} tickLine={false} axisLine={false} />
