@@ -9,52 +9,23 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ViolationsRouteImport } from './routes/violations'
-import { Route as SubscriptionsRouteImport } from './routes/subscriptions'
-import { Route as RegisterRouteImport } from './routes/register'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as JobsRouteImport } from './routes/jobs'
-import { Route as DashboardRouteImport } from './routes/dashboard'
-import { Route as CreativesRouteImport } from './routes/creatives'
-import { Route as AcceptInviteRouteImport } from './routes/accept-invite'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AcceptInviteRouteImport } from './routes/accept-invite'
+import { Route as AiAdsRouteImport } from './routes/ai-ads'
+import { Route as CreativesRouteImport } from './routes/creatives'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as JobsRouteImport } from './routes/jobs'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as SubscriptionsRouteImport } from './routes/subscriptions'
+import { Route as ViolationsRouteImport } from './routes/violations'
+import { Route as CampaignsCampaignIdRouteImport } from './routes/campaigns.$campaignId'
 import { Route as ManageIndexRouteImport } from './routes/manage.index'
 import { Route as ManageCampaignIdRouteImport } from './routes/manage.$campaignId'
-import { Route as CampaignsCampaignIdRouteImport } from './routes/campaigns.$campaignId'
 
-const ViolationsRoute = ViolationsRouteImport.update({
-  id: '/violations',
-  path: '/violations',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SubscriptionsRoute = SubscriptionsRouteImport.update({
-  id: '/subscriptions',
-  path: '/subscriptions',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RegisterRoute = RegisterRouteImport.update({
-  id: '/register',
-  path: '/register',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const JobsRoute = JobsRouteImport.update({
-  id: '/jobs',
-  path: '/jobs',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CreativesRoute = CreativesRouteImport.update({
-  id: '/creatives',
-  path: '/creatives',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AcceptInviteRoute = AcceptInviteRouteImport.update({
@@ -62,9 +33,49 @@ const AcceptInviteRoute = AcceptInviteRouteImport.update({
   path: '/accept-invite',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AiAdsRoute = AiAdsRouteImport.update({
+  id: '/ai-ads',
+  path: '/ai-ads',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CreativesRoute = CreativesRouteImport.update({
+  id: '/creatives',
+  path: '/creatives',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JobsRoute = JobsRouteImport.update({
+  id: '/jobs',
+  path: '/jobs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SubscriptionsRoute = SubscriptionsRouteImport.update({
+  id: '/subscriptions',
+  path: '/subscriptions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ViolationsRoute = ViolationsRouteImport.update({
+  id: '/violations',
+  path: '/violations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CampaignsCampaignIdRoute = CampaignsCampaignIdRouteImport.update({
+  id: '/campaigns/$campaignId',
+  path: '/campaigns/$campaignId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ManageIndexRoute = ManageIndexRouteImport.update({
@@ -77,15 +88,11 @@ const ManageCampaignIdRoute = ManageCampaignIdRouteImport.update({
   path: '/manage/$campaignId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CampaignsCampaignIdRoute = CampaignsCampaignIdRouteImport.update({
-  id: '/campaigns/$campaignId',
-  path: '/campaigns/$campaignId',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/accept-invite': typeof AcceptInviteRoute
+  '/ai-ads': typeof AiAdsRoute
   '/creatives': typeof CreativesRoute
   '/dashboard': typeof DashboardRoute
   '/jobs': typeof JobsRoute
@@ -100,6 +107,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/accept-invite': typeof AcceptInviteRoute
+  '/ai-ads': typeof AiAdsRoute
   '/creatives': typeof CreativesRoute
   '/dashboard': typeof DashboardRoute
   '/jobs': typeof JobsRoute
@@ -115,6 +123,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/accept-invite': typeof AcceptInviteRoute
+  '/ai-ads': typeof AiAdsRoute
   '/creatives': typeof CreativesRoute
   '/dashboard': typeof DashboardRoute
   '/jobs': typeof JobsRoute
@@ -131,6 +140,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/accept-invite'
+    | '/ai-ads'
     | '/creatives'
     | '/dashboard'
     | '/jobs'
@@ -145,6 +155,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/accept-invite'
+    | '/ai-ads'
     | '/creatives'
     | '/dashboard'
     | '/jobs'
@@ -159,6 +170,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/accept-invite'
+    | '/ai-ads'
     | '/creatives'
     | '/dashboard'
     | '/jobs'
@@ -174,6 +186,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AcceptInviteRoute: typeof AcceptInviteRoute
+  AiAdsRoute: typeof AiAdsRoute
   CreativesRoute: typeof CreativesRoute
   DashboardRoute: typeof DashboardRoute
   JobsRoute: typeof JobsRoute
@@ -188,53 +201,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/violations': {
-      id: '/violations'
-      path: '/violations'
-      fullPath: '/violations'
-      preLoaderRoute: typeof ViolationsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/subscriptions': {
-      id: '/subscriptions'
-      path: '/subscriptions'
-      fullPath: '/subscriptions'
-      preLoaderRoute: typeof SubscriptionsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/register': {
-      id: '/register'
-      path: '/register'
-      fullPath: '/register'
-      preLoaderRoute: typeof RegisterRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/jobs': {
-      id: '/jobs'
-      path: '/jobs'
-      fullPath: '/jobs'
-      preLoaderRoute: typeof JobsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/creatives': {
-      id: '/creatives'
-      path: '/creatives'
-      fullPath: '/creatives'
-      preLoaderRoute: typeof CreativesRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/accept-invite': {
@@ -244,11 +215,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AcceptInviteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/ai-ads': {
+      id: '/ai-ads'
+      path: '/ai-ads'
+      fullPath: '/ai-ads'
+      preLoaderRoute: typeof AiAdsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/creatives': {
+      id: '/creatives'
+      path: '/creatives'
+      fullPath: '/creatives'
+      preLoaderRoute: typeof CreativesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/jobs': {
+      id: '/jobs'
+      path: '/jobs'
+      fullPath: '/jobs'
+      preLoaderRoute: typeof JobsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/subscriptions': {
+      id: '/subscriptions'
+      path: '/subscriptions'
+      fullPath: '/subscriptions'
+      preLoaderRoute: typeof SubscriptionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/violations': {
+      id: '/violations'
+      path: '/violations'
+      fullPath: '/violations'
+      preLoaderRoute: typeof ViolationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/campaigns/$campaignId': {
+      id: '/campaigns/$campaignId'
+      path: '/campaigns/$campaignId'
+      fullPath: '/campaigns/$campaignId'
+      preLoaderRoute: typeof CampaignsCampaignIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/manage/': {
@@ -265,19 +292,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ManageCampaignIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/campaigns/$campaignId': {
-      id: '/campaigns/$campaignId'
-      path: '/campaigns/$campaignId'
-      fullPath: '/campaigns/$campaignId'
-      preLoaderRoute: typeof CampaignsCampaignIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AcceptInviteRoute: AcceptInviteRoute,
+  AiAdsRoute: AiAdsRoute,
   CreativesRoute: CreativesRoute,
   DashboardRoute: DashboardRoute,
   JobsRoute: JobsRoute,
