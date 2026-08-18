@@ -1,11 +1,13 @@
 /**
- * Fonte da verdade do mini Ads Manager (mock-first, persistido).
+ * Fonte da verdade do mini Ads Manager (persistido por conta).
  *
  * Mantém a ÁRVORE completa por conta (campanhas → grupos/conjuntos →
  * keywords/públicos + geo/segmentação) e expõe CRUD em todos os níveis.
- * Na 1ª leitura de uma conta a árvore é materializada de `buildAccountTree`
- * (determinística, account-aware) e a partir daí é editável e persistida.
+ * Contas demo do administrador são materializadas de `buildAccountTree`;
+ * contas de empresas sem dados sincronizados começam vazias e só passam a
+ * conter campanhas após criação manual ou sincronização real.
  *
+
  * SSR-safe: estado inicial vazio; localStorage só é lido num effect pós-mount.
  * Leitura é read-through (gera a árvore se ainda não materializada); qualquer
  * mutação materializa e persiste a conta inteira.
@@ -182,8 +184,12 @@ export function ManageProvider({ children }: { children: ReactNode }) {
   }, [trees]);
 
   function getCampaigns(account: AdAccount): Campaign[] {
-    return trees[account.id] ?? buildAccountTree(account);
+    // `brandKey` identifica exclusivamente as contas demo do administrador.
+    // Contas reais/novas não podem receber seeds mock automaticamente.
+    if (trees[account.id]) return trees[account.id];
+    return account.brandKey ? buildAccountTree(account) : [];
   }
+
   function getCampaign(account: AdAccount, campaignId: string): Campaign | undefined {
     return getCampaigns(account).find((c) => c.id === campaignId);
   }
@@ -191,9 +197,10 @@ export function ManageProvider({ children }: { children: ReactNode }) {
   /** Materializa a conta (se preciso) e aplica `fn` à lista de campanhas. */
   function update(account: AdAccount, fn: (list: Campaign[]) => Campaign[]) {
     setTrees((prev) => {
-      const current = prev[account.id] ?? buildAccountTree(account);
+      const current = prev[account.id] ?? (account.brandKey ? buildAccountTree(account) : []);
       return { ...prev, [account.id]: fn(current) };
     });
+
   }
 
   // ── Campanha ──────────────────────────────────────────────────────────────
