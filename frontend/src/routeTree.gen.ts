@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AcceptInviteRouteImport } from './routes/accept-invite'
 import { Route as AiAdsRouteImport } from './routes/ai-ads'
 import { Route as CompaniesRouteImport } from './routes/companies'
+import { Route as CompanyOnboardingRouteImport } from './routes/company-onboarding'
 import { Route as CreativesRouteImport } from './routes/creatives'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as HubRouteImport } from './routes/hub'
@@ -43,6 +44,11 @@ const AiAdsRoute = AiAdsRouteImport.update({
 const CompaniesRoute = CompaniesRouteImport.update({
   id: '/companies',
   path: '/companies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompanyOnboardingRoute = CompanyOnboardingRouteImport.update({
+  id: '/company-onboarding',
+  path: '/company-onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CreativesRoute = CreativesRouteImport.update({
@@ -106,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/accept-invite': typeof AcceptInviteRoute
   '/ai-ads': typeof AiAdsRoute
   '/companies': typeof CompaniesRoute
+  '/company-onboarding': typeof CompanyOnboardingRoute
   '/creatives': typeof CreativesRoute
   '/dashboard': typeof DashboardRoute
   '/hub': typeof HubRoute
@@ -123,6 +130,7 @@ export interface FileRoutesByTo {
   '/accept-invite': typeof AcceptInviteRoute
   '/ai-ads': typeof AiAdsRoute
   '/companies': typeof CompaniesRoute
+  '/company-onboarding': typeof CompanyOnboardingRoute
   '/creatives': typeof CreativesRoute
   '/dashboard': typeof DashboardRoute
   '/hub': typeof HubRoute
@@ -141,6 +149,7 @@ export interface FileRoutesById {
   '/accept-invite': typeof AcceptInviteRoute
   '/ai-ads': typeof AiAdsRoute
   '/companies': typeof CompaniesRoute
+  '/company-onboarding': typeof CompanyOnboardingRoute
   '/creatives': typeof CreativesRoute
   '/dashboard': typeof DashboardRoute
   '/hub': typeof HubRoute
@@ -160,6 +169,7 @@ export interface FileRouteTypes {
     | '/accept-invite'
     | '/ai-ads'
     | '/companies'
+    | '/company-onboarding'
     | '/creatives'
     | '/dashboard'
     | '/hub'
@@ -177,6 +187,7 @@ export interface FileRouteTypes {
     | '/accept-invite'
     | '/ai-ads'
     | '/companies'
+    | '/company-onboarding'
     | '/creatives'
     | '/dashboard'
     | '/hub'
@@ -194,6 +205,7 @@ export interface FileRouteTypes {
     | '/accept-invite'
     | '/ai-ads'
     | '/companies'
+    | '/company-onboarding'
     | '/creatives'
     | '/dashboard'
     | '/hub'
@@ -212,6 +224,7 @@ export interface RootRouteChildren {
   AcceptInviteRoute: typeof AcceptInviteRoute
   AiAdsRoute: typeof AiAdsRoute
   CompaniesRoute: typeof CompaniesRoute
+  CompanyOnboardingRoute: typeof CompanyOnboardingRoute
   CreativesRoute: typeof CreativesRoute
   DashboardRoute: typeof DashboardRoute
   HubRoute: typeof HubRoute
@@ -253,6 +266,13 @@ declare module '@tanstack/react-router' {
       path: '/companies'
       fullPath: '/companies'
       preLoaderRoute: typeof CompaniesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/company-onboarding': {
+      id: '/company-onboarding'
+      path: '/company-onboarding'
+      fullPath: '/company-onboarding'
+      preLoaderRoute: typeof CompanyOnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/creatives': {
@@ -340,6 +360,7 @@ const rootRouteChildren: RootRouteChildren = {
   AcceptInviteRoute: AcceptInviteRoute,
   AiAdsRoute: AiAdsRoute,
   CompaniesRoute: CompaniesRoute,
+  CompanyOnboardingRoute: CompanyOnboardingRoute,
   CreativesRoute: CreativesRoute,
   DashboardRoute: DashboardRoute,
   HubRoute: HubRoute,

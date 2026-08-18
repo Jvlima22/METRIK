@@ -29,6 +29,38 @@ create table if not exists public.companies (
   updated_at timestamptz not null default now()
 );
 
+alter table public.companies add column if not exists legal_name text;
+alter table public.companies add column if not exists trade_name text;
+alter table public.companies add column if not exists corporate_email text;
+alter table public.companies add column if not exists corporate_phone text;
+alter table public.companies add column if not exists website text;
+alter table public.companies add column if not exists segment text;
+alter table public.companies add column if not exists address text;
+alter table public.companies add column if not exists city text;
+alter table public.companies add column if not exists state text;
+alter table public.companies add column if not exists postal_code text;
+alter table public.companies add column if not exists country text default 'Brasil';
+
+create unique index if not exists companies_document_unique_idx on public.companies(document) where document is not null;
+
+create table if not exists public.company_signup_invitations (
+  id uuid primary key default gen_random_uuid(),
+  email text not null,
+  provisional_name text,
+  token_hash text not null unique,
+  status text not null default 'PENDING' check (status in ('PENDING','OPENED','ACCEPTED','EXPIRED','REVOKED','CANCELLED')),
+  invited_by uuid not null references auth.users(id),
+  accepted_by uuid references auth.users(id),
+  company_id uuid references public.companies(id) on delete set null,
+  expires_at timestamptz not null,
+  accepted_at timestamptz,
+  revoked_at timestamptz,
+  created_at timestamptz not null default now(),
+  metadata jsonb not null default '{}'::jsonb
+);
+create index if not exists company_signup_invitations_status_idx on public.company_signup_invitations(status, expires_at);
+create index if not exists company_signup_invitations_email_idx on public.company_signup_invitations(lower(email), created_at desc);
+
 create table if not exists public.company_members (
   id uuid primary key default gen_random_uuid(),
   company_id uuid not null references public.companies(id) on delete cascade,
@@ -110,6 +142,7 @@ $$;
 alter table public.companies enable row level security;
 alter table public.company_members enable row level security;
 alter table public.company_invitations enable row level security;
+alter table public.company_signup_invitations enable row level security;
 alter table public.integration_connections enable row level security;
 alter table public.integration_sync_jobs enable row level security;
 alter table public.integration_audit_logs enable row level security;
@@ -130,21 +163,23 @@ drop policy if exists company_invitations_global_admin_all on public.company_inv
 drop policy if exists integration_connections_company_access on public.integration_connections;
 drop policy if exists integration_sync_jobs_company_access on public.integration_sync_jobs;
 drop policy if exists integration_audit_logs_company_select on public.integration_audit_logs;
+drop policy if exists company_signup_invitations_global_admin_all on public.company_signup_invitations;
 
 create policy companies_member_select on public.companies for select to authenticated using (public.is_company_member(id));
 create policy companies_global_admin_all on public.companies for all to authenticated using (public.is_global_admin()) with check (public.is_global_admin());
 create policy company_members_member_select on public.company_members for select to authenticated using (public.is_company_member(company_id));
 create policy company_members_admin_write on public.company_members for all to authenticated using (public.is_global_admin() or (public.is_company_member(company_id) and role = 'COMPANY_ADMIN')) with check (public.is_global_admin() or public.is_company_member(company_id));
 create policy company_invitations_global_admin_all on public.company_invitations for all to authenticated using (public.is_global_admin()) with check (public.is_global_admin());
+create policy company_signup_invitations_global_admin_all on public.company_signup_invitations for all to authenticated using (public.is_global_admin()) with check (public.is_global_admin());
 create policy integration_connections_company_access on public.integration_connections for all to authenticated using (public.is_company_member(company_id)) with check (public.is_company_member(company_id));
 create policy integration_sync_jobs_company_access on public.integration_sync_jobs for all to authenticated using (public.is_company_member(company_id)) with check (public.is_company_member(company_id));
 create policy integration_audit_logs_company_select on public.integration_audit_logs for select to authenticated using (public.is_company_member(company_id));
 
 -- Remover grants amplos dos papéis cliente; o backend usa a service role apenas no servidor.
-revoke all on table public.companies, public.company_members, public.company_invitations, public.integration_connections, public.integration_sync_jobs, public.integration_audit_logs from anon;
-revoke all on table public.companies, public.company_members, public.company_invitations, public.integration_connections, public.integration_sync_jobs, public.integration_audit_logs from authenticated;
+revoke all on table public.companies, public.company_members, public.company_invitations, public.company_signup_invitations, public.integration_connections, public.integration_sync_jobs, public.integration_audit_logs from anon;
+revoke all on table public.companies, public.company_members, public.company_invitations, public.company_signup_invitations, public.integration_connections, public.integration_sync_jobs, public.integration_audit_logs from authenticated;
 grant select on public.companies, public.company_members, public.integration_connections, public.integration_sync_jobs, public.integration_audit_logs to authenticated;
-grant select on public.company_invitations to authenticated;
+grant select on public.company_invitations, public.company_signup_invitations to authenticated;
 
 comment on table public.companies is 'Tenant lógico isolado do Metrik; toda entidade de negócio deve referenciar company_id.';
 comment on column public.integration_connections.company_id is 'Empresa dona da conexão; nunca confiar somente em owner_user_id.';
