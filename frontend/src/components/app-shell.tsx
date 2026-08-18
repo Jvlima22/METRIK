@@ -57,7 +57,6 @@ const navSections: { group: string; items: NavItem[] }[] = [
       { to: "/manage", label: "Campanhas", icon: Megaphone },
       { to: "/creatives", label: "Criativos", icon: Images },
       { to: "/ai-ads", label: "Inteligencia de Ads", icon: Activity },
-      { to: "/hub", label: "Metrik Hub", icon: Network },
 { to: "/subscriptions", label: "Assinaturas", icon: CreditCard },
     ],
   },
