@@ -55,7 +55,7 @@ export async function validateCompanySignupInvite(token: string) {
   return { id: data.id, email: data.email, provisionalName: data.provisional_name, expiresAt: data.expires_at };
 }
 
-export async function completeCompanySignup(input: { token: string; password: string; fullName: string; phone?: string; cpf?: string; legalName: string; tradeName?: string; cnpj: string; companyEmail: string; companyPhone?: string; website?: string; segment?: string; address?: string; city?: string; state?: string; postalCode?: string; country?: string; timezone?: string }) {
+export async function completeCompanySignup(input: { token: string; password: string; fullName: string; phone?: string; cpf?: string; legalName?: string; tradeName?: string; cnpj?: string; companyEmail?: string; companyPhone?: string; website?: string; segment?: string; address?: string; city?: string; state?: string; postalCode?: string; country?: string; timezone?: string }) {
   const tokenHash = hashToken(input.token);
   const supabase = getSupabaseAdmin();
   const { data: invite, error: inviteError } = await supabase.from('company_signup_invitations').select('id,email,status,expires_at,company_id').eq('token_hash', tokenHash).maybeSingle();
@@ -64,10 +64,14 @@ export async function completeCompanySignup(input: { token: string; password: st
   if (invite.status === 'ACCEPTED' && invite.company_id) return { completed: true, companyId: invite.company_id, email: invite.email };
   if (!['PENDING', 'OPENED'].includes(invite.status)) throw new AppError('Convite já utilizado ou revogado', 410);
   if (input.password.length < 8) throw new AppError('A senha deve ter pelo menos 8 caracteres', 400);
-  const validatedCnpj = await validateCnpj(input.cnpj);
-  const cnpj = validatedCnpj.cnpj;
-  const { data: existingCompany } = await supabase.from('companies').select('id').eq('document', cnpj).maybeSingle();
-  if (existingCompany) throw new AppError('Este CNPJ já está cadastrado', 409);
+  const normalizedCnpj = input.cnpj?.replace(/\D/g, '') || '';
+  const validatedCnpj = normalizedCnpj ? await validateCnpj(normalizedCnpj) : null;
+  const cnpj = validatedCnpj?.cnpj || null;
+  if (cnpj) {
+    const { data: existingCompany } = await supabase.from('companies').select('id').eq('document', cnpj).maybeSingle();
+    if (existingCompany) throw new AppError('Este CNPJ já está cadastrado', 409);
+  }
+  const companyName = input.tradeName?.trim() || input.legalName?.trim() || invite.email.split('@')[0] || 'Nova empresa';
 
   const { data: users } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 });
   const authUser = users?.users.find((user) => user.email?.toLowerCase() === invite.email.toLowerCase());
@@ -75,7 +79,7 @@ export async function completeCompanySignup(input: { token: string; password: st
   const { error: updateError } = await supabase.auth.admin.updateUserById(authUser.id, { password: input.password, user_metadata: { ...(authUser.user_metadata ?? {}), name: input.fullName, phone: input.phone, cpf: input.cpf } });
   if (updateError) throw new AppError(`Não foi possível concluir a conta: ${updateError.message}`, 400);
 
-  const { data: company, error: companyError } = await supabase.from('companies').insert({ name: input.tradeName?.trim() || validatedCnpj.tradeName || validatedCnpj.legalName, slug: slugify(input.tradeName || validatedCnpj.legalName), document: cnpj, legal_name: validatedCnpj.legalName, trade_name: input.tradeName?.trim() || validatedCnpj.tradeName, corporate_email: input.companyEmail.trim().toLowerCase(), corporate_phone: input.companyPhone || validatedCnpj.phone, website: input.website || null, segment: input.segment || null, address: input.address || validatedCnpj.address, city: input.city || validatedCnpj.city, state: input.state || validatedCnpj.state, postal_code: input.postalCode || validatedCnpj.postalCode, country: input.country || 'Brasil', timezone: input.timezone || 'America/Sao_Paulo', cnpj_validation_status: validatedCnpj.status === 'ATIVA' ? 'VALID' : 'INVALID', cnpj_validated_at: validatedCnpj.checkedAt, cnpj_validation_provider: validatedCnpj.provider, cnpj_validation_payload: { legalName: validatedCnpj.legalName, tradeName: validatedCnpj.tradeName, status: validatedCnpj.status, city: validatedCnpj.city, state: validatedCnpj.state, primaryCnae: validatedCnpj.primaryCnae }, created_by: authUser.id }).select('id,name,slug,status').single();
+  const { data: company, error: companyError } = await supabase.from('companies').insert({ name: companyName, slug: slugify(companyName), document: cnpj, legal_name: validatedCnpj?.legalName || input.legalName?.trim() || null, trade_name: input.tradeName?.trim() || validatedCnpj?.tradeName || null, corporate_email: (input.companyEmail || invite.email).trim().toLowerCase(), corporate_phone: input.companyPhone || validatedCnpj?.phone || null, website: input.website || null, segment: input.segment || null, address: input.address || validatedCnpj?.address || null, city: input.city || validatedCnpj?.city || null, state: input.state || validatedCnpj?.state || null, postal_code: input.postalCode || validatedCnpj?.postalCode || null, country: input.country || 'Brasil', timezone: input.timezone || 'America/Sao_Paulo', cnpj_validation_status: validatedCnpj ? (validatedCnpj.status === 'ATIVA' ? 'VALID' : 'INVALID') : 'PENDING', cnpj_validated_at: validatedCnpj?.checkedAt || null, cnpj_validation_provider: validatedCnpj?.provider || null, cnpj_validation_payload: validatedCnpj ? { legalName: validatedCnpj.legalName, tradeName: validatedCnpj.tradeName, status: validatedCnpj.status, city: validatedCnpj.city, state: validatedCnpj.state, primaryCnae: validatedCnpj.primaryCnae } : {}, created_by: authUser.id }).select('id,name,slug,status').single();
   if (companyError || !company) throw new AppError(`Conta criada, mas não foi possível criar empresa: ${companyError?.message ?? 'registro vazio'}`, 500);
   const { error: memberError } = await supabase.from('company_members').insert({ company_id: company.id, user_id: authUser.id, role: 'COMPANY_ADMIN' as CompanyRole, status: 'ACTIVE' });
   if (memberError) throw new AppError(`Empresa criada, mas não foi possível criar o administrador: ${memberError.message}`, 500);
