@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "../lib/auth-context";
 import { AccountProvider } from "../lib/account-context";
 import { ManageProvider } from "../lib/manage-store";
+import { PlanProvider } from "../lib/plan-context";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import "@fontsource/space-grotesk/400.css";
@@ -135,13 +136,15 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <AccountProvider>
-          <ManageProvider>
+          <PlanProvider>
+            <ManageProvider>
             <TooltipProvider delayDuration={200}>
               {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
               <Outlet />
               <Toaster richColors position="top-right" />
             </TooltipProvider>
           </ManageProvider>
+          </PlanProvider>
         </AccountProvider>
       </AuthProvider>
     </QueryClientProvider>
