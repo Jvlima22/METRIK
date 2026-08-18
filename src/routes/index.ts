@@ -5,6 +5,7 @@ import metricsRoutes from "./metrics.routes";
 import authRoutes from "./auth.routes";
 import adsIntelligenceRoutes from "./ads-intelligence.routes";
 import adsDraftRoutes from "./ads-drafts.routes";
+import integrationHubRoutes from "./integration-hub.routes";
 
 const router = Router();
 router.use("/webhook", webhookRoutes);
@@ -13,4 +14,5 @@ router.use("/metrics", metricsRoutes);
 router.use("/auth", authRoutes);
 router.use("/ai", adsIntelligenceRoutes);
 router.use("/ai", adsDraftRoutes);
+router.use("/integrations", integrationHubRoutes);
 export default router;
