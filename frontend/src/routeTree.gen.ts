@@ -14,6 +14,7 @@ import { Route as AcceptInviteRouteImport } from './routes/accept-invite'
 import { Route as AiAdsRouteImport } from './routes/ai-ads'
 import { Route as CreativesRouteImport } from './routes/creatives'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as HubRouteImport } from './routes/hub'
 import { Route as JobsRouteImport } from './routes/jobs'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as RegisterRouteImport } from './routes/register'
@@ -46,6 +47,11 @@ const CreativesRoute = CreativesRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HubRoute = HubRouteImport.update({
+  id: '/hub',
+  path: '/hub',
   getParentRoute: () => rootRouteImport,
 } as any)
 const JobsRoute = JobsRouteImport.update({
@@ -95,6 +101,7 @@ export interface FileRoutesByFullPath {
   '/ai-ads': typeof AiAdsRoute
   '/creatives': typeof CreativesRoute
   '/dashboard': typeof DashboardRoute
+  '/hub': typeof HubRoute
   '/jobs': typeof JobsRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
@@ -110,6 +117,7 @@ export interface FileRoutesByTo {
   '/ai-ads': typeof AiAdsRoute
   '/creatives': typeof CreativesRoute
   '/dashboard': typeof DashboardRoute
+  '/hub': typeof HubRoute
   '/jobs': typeof JobsRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
@@ -126,6 +134,7 @@ export interface FileRoutesById {
   '/ai-ads': typeof AiAdsRoute
   '/creatives': typeof CreativesRoute
   '/dashboard': typeof DashboardRoute
+  '/hub': typeof HubRoute
   '/jobs': typeof JobsRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
@@ -143,6 +152,7 @@ export interface FileRouteTypes {
     | '/ai-ads'
     | '/creatives'
     | '/dashboard'
+    | '/hub'
     | '/jobs'
     | '/login'
     | '/register'
@@ -158,6 +168,7 @@ export interface FileRouteTypes {
     | '/ai-ads'
     | '/creatives'
     | '/dashboard'
+    | '/hub'
     | '/jobs'
     | '/login'
     | '/register'
@@ -173,6 +184,7 @@ export interface FileRouteTypes {
     | '/ai-ads'
     | '/creatives'
     | '/dashboard'
+    | '/hub'
     | '/jobs'
     | '/login'
     | '/register'
@@ -189,6 +201,7 @@ export interface RootRouteChildren {
   AiAdsRoute: typeof AiAdsRoute
   CreativesRoute: typeof CreativesRoute
   DashboardRoute: typeof DashboardRoute
+  HubRoute: typeof HubRoute
   JobsRoute: typeof JobsRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
@@ -234,6 +247,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hub': {
+      id: '/hub'
+      path: '/hub'
+      fullPath: '/hub'
+      preLoaderRoute: typeof HubRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/jobs': {
@@ -301,6 +321,7 @@ const rootRouteChildren: RootRouteChildren = {
   AiAdsRoute: AiAdsRoute,
   CreativesRoute: CreativesRoute,
   DashboardRoute: DashboardRoute,
+  HubRoute: HubRoute,
   JobsRoute: JobsRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
