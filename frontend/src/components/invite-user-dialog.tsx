@@ -22,11 +22,14 @@ import { useAuth } from "@/lib/auth-context";
 export function InviteUserDialog({
   open,
   onOpenChange,
+  mode = 'MEMBER',
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  mode?: 'COMPANY' | 'MEMBER';
 }) {
   const { inviteUser } = useAuth();
+  const isCompanyInvite = mode === 'COMPANY';
   const [email, setEmail] = useState("");
   const [sending, setSending] = useState(false);
 
@@ -37,7 +40,7 @@ export function InviteUserDialog({
       return;
     }
     setSending(true);
-    const { error } = await inviteUser(trimmed);
+    const { error } = await inviteUser(trimmed, mode);
     setSending(false);
     if (error) {
       toast.error("Falha ao enviar convite", { description: error });
@@ -52,14 +55,14 @@ export function InviteUserDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Convidar empresa ou membro</DialogTitle>
+          <DialogTitle>{isCompanyInvite ? 'Convidar nova empresa' : 'Convidar membro'}</DialogTitle>
           <DialogDescription>
-            Enviaremos um link de cadastro por e-mail. Sem empresa ativa, o convite inicia uma nova empresa; com empresa ativa, adiciona um membro.
+            {isCompanyInvite ? 'Envie um link para o responsável criar a conta e cadastrar a empresa.' : 'Envie um link para um funcionário criar a conta e acessar os dados da empresa ativa.'}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-1.5">
-          <Label htmlFor="invite-email">E-mail do cliente ou membro</Label>
+          <Label htmlFor="invite-email">{isCompanyInvite ? 'E-mail do responsável pela empresa' : 'E-mail do membro da equipe'}</Label>
           <Input
             id="invite-email"
             type="email"

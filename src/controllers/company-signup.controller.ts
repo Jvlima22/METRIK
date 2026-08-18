@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { AppError } from '../utils/AppError';
-import { createCompanySignupInvite, validateCompanySignupInvite, completeCompanySignup } from '../services/company-signup.service';
+import { completeCompanySignup, createCompanySignupInvite, validateCompanySignupInvite } from '../services/company-signup.service';
+import { validateCnpj } from '../services/cnpj-validation.service';
 
 function adminId(req: Request) {
   if (!req.user?.id) throw new AppError('Administrador não identificado', 401);
@@ -26,4 +27,8 @@ export async function postCompanySignupComplete(req: Request, res: Response, nex
     for (const field of required) if (typeof body[field] !== 'string' || !body[field].trim()) throw new AppError(`${field} é obrigatório`, 400);
     res.status(201).json({ data: await completeCompanySignup(body) });
   } catch (error) { next(error); }
+}
+
+export async function getCnpjValidation(req: Request, res: Response, next: NextFunction) {
+  try { res.json({ data: await validateCnpj(String(req.params.cnpj ?? '')) }); } catch (error) { next(error); }
 }

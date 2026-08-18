@@ -15,10 +15,12 @@ export async function inviteUser(req: Request, res: Response, next: NextFunction
     const { email } = req.body as { email: string };
     const normalizedEmail = email.trim().toLowerCase();
     const companyId = typeof req.headers['x-company-id'] === 'string' ? req.headers['x-company-id'] : undefined;
+    const inviteKind = req.headers['x-invite-kind'] === 'COMPANY' ? 'COMPANY' : 'MEMBER';
     const userId = req.user?.id;
     if (!userId) throw new AppError('Usuário autenticado não identificado', 401);
 
-    if (companyId) {
+    if (inviteKind === 'MEMBER') {
+      if (!companyId) throw new AppError('Selecione uma empresa ativa para convidar um membro', 400);
       const invite = await inviteToCompany(companyId, normalizedEmail, 'COMPANY_OPERATOR', userId);
       res.status(201).json({ status: 'ok', type: 'MEMBER', invited: normalizedEmail, invitationId: invite.id, by: req.user?.email });
       return;

@@ -14,6 +14,7 @@ import {
   Loader2,
   LogOut,
   UserPlus,
+  Building2,
   type LucideIcon,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
@@ -59,7 +60,6 @@ const navSections: { group: string; items: NavItem[] }[] = [
       { to: "/creatives", label: "Criativos", icon: Images },
       { to: "/ai-ads", label: "Inteligencia de Ads", icon: Activity },
       { to: "/subscriptions", label: "Assinaturas", icon: CreditCard },
-      { to: "/companies", label: "Empresas", icon: Building2, adminOnly: true },
     ],
   },
 ];
@@ -101,6 +101,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { user, loading, isAuthenticated, isConfigured, isAdmin, signOut } = useAuth();
   const [feedOpen, setFeedOpen] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [inviteMode, setInviteMode] = useState<'COMPANY' | 'MEMBER'>('MEMBER');
   const [collapsed, setCollapsed] = useState(false);
   const unread = activityFeed.filter((e) => e.kind === "violation" || e.kind === "auto_pause").length;
 
@@ -281,9 +282,13 @@ export function AppShell({ children }: { children: ReactNode }) {
               <DropdownMenuSeparator />
               {isAdmin && (
                 <>
-                  <DropdownMenuItem onClick={() => setInviteOpen(true)}>
+                  <DropdownMenuItem onClick={() => { setInviteMode('COMPANY'); setInviteOpen(true); }}>
+                    <Building2 className="size-4" />
+                    Convidar empresa
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => { setInviteMode('MEMBER'); setInviteOpen(true); }}>
                     <UserPlus className="size-4" />
-                    Convidar empresa ou membro
+                    Convidar membro
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                 </>
@@ -319,7 +324,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <main className="flex-1 p-4 md:p-8 max-w-[1500px] mx-auto w-full">{children}</main>
       </div>
       <ActivityFeedPanel open={feedOpen} onClose={() => setFeedOpen(false)} />
-      {isAdmin && <InviteUserDialog open={inviteOpen} onOpenChange={setInviteOpen} />}
+      {isAdmin && <InviteUserDialog open={inviteOpen} onOpenChange={setInviteOpen} mode={inviteMode} />}
     </div>
   );
 }
