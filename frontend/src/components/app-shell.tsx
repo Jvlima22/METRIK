@@ -4,7 +4,6 @@ import {
   ShieldAlert,
   Activity,
   Megaphone,
-  Network,
   Images,
   CreditCard,
   Search,
