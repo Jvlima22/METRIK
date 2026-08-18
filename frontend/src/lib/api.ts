@@ -6,7 +6,7 @@ import { getSupabaseClient } from "./supabase";
  * (`/jobs`, `/metrics`) aceitem a requisição. Lança em respostas não-2xx com a
  * mensagem do backend (`{ message }`).
  */
-const API_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? "http://localhost:3000";
+const API_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? (import.meta.env.DEV ? "http://localhost:3000" : "https://metrik-backend.vercel.app");
 
 export async function apiFetch<T = unknown>(
   path: string,
