@@ -27,10 +27,10 @@ type Company = { id: string; name: string; status: string; document?: string | n
  * Collapses to just the platform badge when the sidebar is collapsed.
  */
 export function AccountSwitcher({ collapsed }: { collapsed: boolean }) {
-  const { accounts, activeAccount, setActiveAccount } = useAccount();
+  const { accounts, activeAccount, activeCompanyId, setActiveCompanyId, setActiveAccount } = useAccount();
   const { isAdmin } = useAuth();
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(activeCompanyId);
   const [addOpen, setAddOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
 
@@ -41,7 +41,7 @@ export function AccountSwitcher({ collapsed }: { collapsed: boolean }) {
 
   function chooseCompany(companyId: string) {
     setSelectedCompanyId(companyId);
-    window.localStorage.setItem('metrik:active-company-id', companyId);
+    setActiveCompanyId(companyId);
   }
 
   return (
@@ -83,6 +83,12 @@ export function AccountSwitcher({ collapsed }: { collapsed: boolean }) {
             </div>
             <DropdownMenuSeparator />
           </>}
+          {accounts.length === 0 && (
+            <div className="mx-1 mb-2 rounded-lg border border-dashed border-border p-3 text-center">
+              <p className="text-xs font-medium">Nenhuma conta conectada</p>
+              <p className="mt-1 text-[10px] text-muted-foreground">Adicione uma conta Google Ads ou Meta Ads para começar a importar métricas.</p>
+            </div>
+          )}
           {PLATFORM_ORDER.map((p) => {
             const group = accounts.filter((a) => a.platform === p);
             if (!group.length) return null;

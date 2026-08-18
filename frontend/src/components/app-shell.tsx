@@ -14,7 +14,6 @@ import {
   Loader2,
   LogOut,
   UserPlus,
-  Building2,
   type LucideIcon,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";

@@ -144,10 +144,10 @@ function CompanyOnboardingPage() {
   }
 
   if (error && !invite) {
-    return <AuthLayout title="Convite indisponível" subtitle="Não foi possível validar este link."><div className="flex items-center gap-3 rounded-lg border border-border bg-accent/40 p-4 text-sm text-muted-foreground"><ShieldX className="size-5 shrink-0 text-destructive" /><p>{error}</p></div></AuthLayout>;
+    return <AuthLayout title="Convite indisponível" subtitle="Não foi possível validar este link." footer={null}><div className="flex items-center gap-3 rounded-lg border border-border bg-accent/40 p-4 text-sm text-muted-foreground"><ShieldX className="size-5 shrink-0 text-destructive" /><p>{error}</p></div></AuthLayout>;
   }
 
-  return <AuthLayout title="Criar conta no Metrik" subtitle={`Convite destinado a ${invite?.email ?? ''}`}>
+  return <AuthLayout title="Criar conta no Metrik" subtitle={`Convite destinado a ${invite?.email ?? ''}`} footer={null}>
     <div className="mb-5 flex items-center gap-2 text-xs"><span className={`flex items-center gap-1 ${step >= 1 ? 'font-semibold text-violet' : 'text-muted-foreground'}`}><CheckCircle2 className="size-4" />Conta</span><span className="h-px flex-1 bg-border" /><span className={`flex items-center gap-1 ${step === 2 ? 'font-semibold text-violet' : 'text-muted-foreground'}`}><Building2 className="size-4" />Empresa</span></div>
     {error && <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">{error}</div>}
 

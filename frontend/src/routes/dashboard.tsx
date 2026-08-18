@@ -50,7 +50,8 @@ import {
   formatCompact,
   type CampaignMetrics,
 } from "@/lib/mock-data";
-import { useAccount } from "@/lib/account-context";
+import { EMPTY_ACCOUNT, useAccount } from "@/lib/account-context";
+import { useAuth } from "@/lib/auth-context";
 import { PLATFORM_DATA_KEY, accountScale, platformMeta } from "@/lib/accounts";
 
 export const Route = createFileRoute("/dashboard")({
@@ -169,15 +170,18 @@ function DashboardPage() {
   // Scope the dashboard to the active account: keep only its platform and
   // apply a deterministic per-account scale so switching accounts changes the
   // numbers (pure mock — no real API call).
-  const { activeAccount } = useAccount();
+  const { activeAccount, activeCompanyId } = useAccount();
+  const { isAdmin } = useAuth();
+  const showAdminDemo = isAdmin && !activeCompanyId && activeAccount.id !== EMPTY_ACCOUNT.id;
   const performanceCardRef = useRef<HTMLDivElement>(null);
   const [exportingPerformance, setExportingPerformance] = useState(false);
   const accountPlatform = PLATFORM_DATA_KEY[activeAccount.platform];
   const scale = accountScale(activeAccount.accountId);
 
   const scopedCampaigns = useMemo(
-    () =>
-      campaignsForBrand(activeAccount.brandKey)
+    () => {
+      if (!showAdminDemo) return [];
+      return campaignsForBrand(activeAccount.brandKey)
         .filter((c) => getCreative(c.campaignId).platform === accountPlatform)
         .map((c) => ({
           ...c,
@@ -185,22 +189,27 @@ function DashboardPage() {
           clicks: Math.round(c.clicks * scale),
           costMicros: Math.round(c.costMicros * scale),
           conversions: Math.round(c.conversions * scale),
-        })),
-    [accountPlatform, scale, activeAccount.brandKey],
+        }));
+    },
+    [accountPlatform, scale, activeAccount.brandKey, showAdminDemo],
   );
 
   const scopedTrend = useMemo(
-    () =>
-      mockTrend.map((d) => ({
+    () => {
+      if (!showAdminDemo) return [];
+      return mockTrend.map((d) => ({
         ...d,
         impressions: Math.round(d.impressions * scale),
         clicks: Math.round(d.clicks * scale),
         engagement: Math.round(d.engagement * scale),
         conversions: Math.round(d.conversions * scale),
         cost: Math.round(d.cost * scale),
-      })),
-    [scale],
+      }));
+    },
+    [scale, showAdminDemo],
   );
+
+  const scopedDeviceMix = showAdminDemo ? deviceMix : [];
 
   // Recorta a série temporal pelo intervalo De/Até (filtro de data funcional).
   const filteredTrend = useMemo(
@@ -248,7 +257,7 @@ function DashboardPage() {
       ...t,
       ctr: t.clicks / Math.max(1, t.impressions),
       cpc: t.cost / Math.max(1, t.clicks),
-      healthPct: filtered.length ? Math.round((t.healthy / filtered.length) * 100) : 100,
+      healthPct: filtered.length ? Math.round((t.healthy / filtered.length) * 100) : 0,
     };
   }, [filtered]);
 
@@ -460,8 +469,8 @@ function DashboardPage() {
             </div>
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>
-                <Pie data={deviceMix} dataKey="value" innerRadius={55} outerRadius={80} paddingAngle={2}>
-                  {deviceMix.map((_, i) => <Cell key={i} fill={PIE_COLORS[i]} />)}
+                <Pie data={scopedDeviceMix} dataKey="value" innerRadius={55} outerRadius={80} paddingAngle={2}>
+                  {scopedDeviceMix.map((_, i) => <Cell key={i} fill={PIE_COLORS[i]} />)}
                 </Pie>
                 <Tooltip contentStyle={{ background: "#fff", border: "1px solid #e6e8ef", borderRadius: 10, fontSize: 12 }} />
               </PieChart>

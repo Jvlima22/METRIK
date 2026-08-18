@@ -17,7 +17,9 @@ import { GlassCard } from "@/components/glass-card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { mockCampaigns, campaignTrend, formatMicros, formatNumber } from "@/lib/mock-data";
+import { mockCampaigns, campaignTrend, formatMicros, formatNumber, type CampaignMetrics } from "@/lib/mock-data";
+import { useAuth } from "@/lib/auth-context";
+import { useAccount } from "@/lib/account-context";
 
 export const Route = createFileRoute("/campaigns/$campaignId")({
   head: ({ params }) => ({
@@ -56,8 +58,14 @@ function StatCard({ icon: Icon, label, value, sub }: { icon: any; label: string;
 }
 
 function CampaignDetail() {
-  const { campaign, trend } = Route.useLoaderData();
+  const { isAdmin } = useAuth();
+  const { activeCompanyId } = useAccount();
+  const { campaign, trend } = Route.useLoaderData() as { campaign: CampaignMetrics; trend: ReturnType<typeof campaignTrend> };
   const c = campaign;
+
+  if (!isAdmin || activeCompanyId) {
+    return <AppShell><div className="py-20 text-center"><h2 className="font-display text-2xl font-bold">Campanha não disponível</h2><p className="mt-2 text-sm text-muted-foreground">Os dados de demonstração estão disponíveis somente para o administrador global.</p><Link to="/dashboard" className="mt-4 inline-block text-violet underline">Voltar ao dashboard</Link></div></AppShell>;
+  }
 
   return (
     <AppShell>
