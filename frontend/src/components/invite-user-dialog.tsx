@@ -16,8 +16,8 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/lib/auth-context";
 
 /**
- * Diálogo (admin) para convidar um novo usuário por e-mail. Dispara o
- * `POST /auth/invite` no backend, que envia o link de cadastro via Supabase.
+ * Diálogo único para convidar um novo membro ou uma nova empresa por e-mail.
+ * O backend decide o tipo pelo contexto de empresa ativa.
  */
 export function InviteUserDialog({
   open,
@@ -52,14 +52,14 @@ export function InviteUserDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Convidar usuário</DialogTitle>
+          <DialogTitle>Convidar empresa ou membro</DialogTitle>
           <DialogDescription>
-            Enviaremos um link de cadastro por e-mail. Só quem recebe o convite consegue criar conta.
+            Enviaremos um link de cadastro por e-mail. Sem empresa ativa, o convite inicia uma nova empresa; com empresa ativa, adiciona um membro.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-1.5">
-          <Label htmlFor="invite-email">E-mail do convidado</Label>
+          <Label htmlFor="invite-email">E-mail do cliente ou membro</Label>
           <Input
             id="invite-email"
             type="email"

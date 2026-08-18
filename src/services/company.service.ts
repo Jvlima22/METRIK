@@ -1,4 +1,5 @@
 import { getSupabaseAdmin } from '../lib/supabase';
+import { env } from '../config/env';
 import { AppError } from '../utils/AppError';
 import type { CompanyRole } from '../types/express';
 
@@ -32,7 +33,7 @@ export async function inviteToCompany(companyId: string, email: string, role: Co
   if (!company) throw new AppError('Empresa não encontrada ou inativa', 404);
   const { data: invite, error } = await getSupabaseAdmin().from('company_invitations').insert({ company_id: companyId, email: normalizedEmail, role, invited_by: invitedBy }).select('id,company_id,email,role,status,expires_at,created_at').single();
   if (error || !invite) throw new AppError(`Não foi possível registrar convite: ${error?.message ?? 'registro vazio'}`, 500);
-  const { error: authError } = await getSupabaseAdmin().auth.admin.inviteUserByEmail(normalizedEmail, { data: { company_id: companyId, company_name: company.name, invitation_id: invite.id, role } });
+  const { error: authError } = await getSupabaseAdmin().auth.admin.inviteUserByEmail(normalizedEmail, { redirectTo: `${env.FRONTEND_ORIGIN}/accept-invite`, data: { company_id: companyId, company_name: company.name, invitation_id: invite.id, role } });
   if (authError && !authError.message.toLowerCase().includes('already')) throw new AppError(`Convite não enviado pelo Supabase Auth: ${authError.message}`, 502);
   return invite;
 }

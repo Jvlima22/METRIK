@@ -283,7 +283,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <>
                   <DropdownMenuItem onClick={() => setInviteOpen(true)}>
                     <UserPlus className="size-4" />
-                    Convidar usuário
+                    Convidar empresa ou membro
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                 </>
