@@ -43,7 +43,7 @@ type AuthContextValue = {
   /** Finaliza um convite: grava perfil + senha na sessão criada pelo link. */
   acceptInvite: (profile: InviteProfile) => Promise<AuthResult>;
   /** Dispara um convite de cadastro (admin only — validado no backend). */
-  inviteUser: (email: string, kind?: 'COMPANY' | 'MEMBER') => Promise<AuthResult>;
+  inviteUser: (email: string, kind?: 'COMPANY' | 'MEMBER', companyId?: string) => Promise<AuthResult>;
   signOut: () => Promise<void>;
 };
 
@@ -105,11 +105,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: error?.message ?? null };
   }
 
-  async function inviteUser(email: string, kind: 'COMPANY' | 'MEMBER' = 'MEMBER'): Promise<AuthResult> {
+  async function inviteUser(email: string, kind: 'COMPANY' | 'MEMBER' = 'MEMBER', companyId?: string): Promise<AuthResult> {
     try {
       await apiFetch("/auth/invite", {
         method: "POST",
-        headers: { 'x-invite-kind': kind },
+        headers: { 'x-invite-kind': kind, ...(companyId ? { 'x-company-id': companyId } : {}) },
         body: JSON.stringify({ email }),
       });
       return { error: null };

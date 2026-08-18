@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Loader2, Send } from "lucide-react";
 import { toast } from "sonner";
 
@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/lib/auth-context";
+import { apiFetch } from "@/lib/api";
 
 /**
  * Diálogo único para convidar um novo membro ou uma nova empresa por e-mail.
@@ -31,7 +32,21 @@ export function InviteUserDialog({
   const { inviteUser } = useAuth();
   const isCompanyInvite = mode === 'COMPANY';
   const [email, setEmail] = useState("");
+  const [companyId, setCompanyId] = useState("");
+  const [companies, setCompanies] = useState<Array<{ id: string; name: string; status: string }>>([]);
   const [sending, setSending] = useState(false);
+
+  useEffect(() => {
+    if (!open || isCompanyInvite) return;
+    apiFetch<{ data: Array<{ id: string; name: string; status: string }> }>('/companies')
+      .then(({ data }) => {
+        const active = data.filter((company) => company.status === 'ACTIVE');
+        setCompanies(active);
+        const stored = typeof window !== 'undefined' ? window.localStorage.getItem('metrik:active-company-id') : null;
+        setCompanyId(stored && active.some((company) => company.id === stored) ? stored : active[0]?.id ?? '');
+      })
+      .catch(() => { setCompanies([]); setCompanyId(''); });
+  }, [open, isCompanyInvite]);
 
   async function handleInvite() {
     const trimmed = email.trim();
@@ -40,7 +55,11 @@ export function InviteUserDialog({
       return;
     }
     setSending(true);
-    const { error } = await inviteUser(trimmed, mode);
+    if (!isCompanyInvite && !companyId) {
+      toast.error('Selecione a empresa do membro');
+      return;
+    }
+    const { error } = await inviteUser(trimmed, mode, companyId || undefined);
     setSending(false);
     if (error) {
       toast.error("Falha ao enviar convite", { description: error });
@@ -61,7 +80,9 @@ export function InviteUserDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-1.5">
+          {!isCompanyInvite && <div className="space-y-1.5"><Label htmlFor="invite-company">Empresa do membro</Label><select id="invite-company" className="h-10 w-full rounded-md border bg-background px-3 text-sm" value={companyId} onChange={(event) => setCompanyId(event.target.value)}><option value="">Selecione uma empresa</option>{companies.map((company) => <option key={company.id} value={company.id}>{company.name}</option>)}</select></div>}
+
+          <div className="space-y-1.5">
           <Label htmlFor="invite-email">{isCompanyInvite ? 'E-mail do responsável pela empresa' : 'E-mail do membro da equipe'}</Label>
           <Input
             id="invite-email"
