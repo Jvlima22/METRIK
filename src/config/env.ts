@@ -43,6 +43,7 @@ const envSchema = z.object({
   // Origem do frontend liberada no CORS + base do link de convite. O dev server
   // (vite-config da Lovable) roda em :8080 por padrÃ£o.
   FRONTEND_ORIGIN: z.string().url().default('http://localhost:8080'),
+  CORS_ORIGINS: z.string().default('http://localhost:8080,http://localhost:5173,https://metrik-ai.vercel.app').transform((value) => value.split(',').map((origin) => origin.trim()).filter(Boolean)),
 
   // Credenciais das plataformas. Opcionais no boot: a API sobe sem elas.
   // Se um takedown chegar para uma plataforma sem credencial, o job falha

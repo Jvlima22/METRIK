@@ -1,12 +1,25 @@
 ﻿import express from 'express';
-import cors from 'cors';
+import cors, { type CorsOptions } from 'cors';
 import { env } from './config/env';
 import { errorHandler } from './middlewares/error.middleware';
 import routes from './routes';
 
+const corsOptions: CorsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || env.CORS_ORIGINS.includes(origin)) {
+      callback(null, true);
+      return;
+    }
+    callback(new Error(`Origem não permitida pelo CORS: ${origin}`));
+  },
+  methods: ['GET', 'HEAD', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-company-id', 'x-invite-kind'],
+  optionsSuccessStatus: 204,
+};
+
 export const app = express();
 
-app.use(cors({ origin: env.FRONTEND_ORIGIN }));
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
