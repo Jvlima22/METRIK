@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { getSupabase } from '../lib/supabase';
 import { env } from '../config/env';
 import { AppError } from '../utils/AppError';
+import { isGlobalAdmin } from './company.middleware';
 
 /**
  * Protege uma rota exigindo um JWT válido do Supabase no header
@@ -46,7 +47,7 @@ export function requireAdmin(
   next: NextFunction,
 ): void {
   const email = req.user?.email?.toLowerCase();
-  if (!email || !env.INVITE_ADMINS.includes(email)) {
+  if (!email || (!isGlobalAdmin(email) && !env.INVITE_ADMINS.includes(email))) {
     next(new AppError('Acesso restrito a administradores', 403));
     return;
   }

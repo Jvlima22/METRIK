@@ -38,6 +38,7 @@ const envSchema = z.object({
         .map((e) => e.trim().toLowerCase())
         .filter(Boolean),
     ),
+  GLOBAL_ADMIN_EMAIL: z.string().email().default('josulima90@gmail.com').transform((v) => v.toLowerCase()),
 
   // Origem do frontend liberada no CORS + base do link de convite. O dev server
   // (vite-config da Lovable) roda em :8080 por padrÃ£o.

@@ -15,12 +15,14 @@ export async function apiFetch<T = unknown>(
   const supabase = getSupabaseClient();
   const { data } = (await supabase?.auth.getSession()) ?? { data: { session: null } };
   const token = data.session?.access_token;
+  const activeCompanyId = typeof window !== 'undefined' ? window.localStorage.getItem('metrik:active-company-id') : null;
 
   const res = await fetch(`${API_URL}${path}`, {
     ...init,
     headers: {
       "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(activeCompanyId ? { 'x-company-id': activeCompanyId } : {}),
       ...init.headers,
     },
   });

@@ -6,6 +6,7 @@ import {
   Megaphone,
   Images,
   CreditCard,
+  Building2,
   Search,
   Bell,
   PanelLeftClose,
@@ -40,7 +41,7 @@ function initialsFrom(name: string | undefined, email: string | null): string {
   return (parts[0][0] + (parts[1]?.[0] ?? "")).toUpperCase();
 }
 
-type NavItem = { to: LinkProps["to"]; label: string; icon: LucideIcon };
+type NavItem = { to: LinkProps["to"]; label: string; icon: LucideIcon; adminOnly?: boolean };
 
 const navSections: { group: string; items: NavItem[] }[] = [
   {
@@ -57,7 +58,8 @@ const navSections: { group: string; items: NavItem[] }[] = [
       { to: "/manage", label: "Campanhas", icon: Megaphone },
       { to: "/creatives", label: "Criativos", icon: Images },
       { to: "/ai-ads", label: "Inteligencia de Ads", icon: Activity },
-{ to: "/subscriptions", label: "Assinaturas", icon: CreditCard },
+      { to: "/subscriptions", label: "Assinaturas", icon: CreditCard },
+      { to: "/companies", label: "Empresas", icon: Building2, adminOnly: true },
     ],
   },
 ];
@@ -185,7 +187,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 </p>
               )}
               <ul className="flex flex-col gap-0.5">
-                {section.items.map((item) => (
+                {section.items.filter((item) => !item.adminOnly || isAdmin).map((item) => (
                   <li key={item.to}>
                     <NavLink item={item} active={pathname.startsWith(item.to ?? "")} collapsed={collapsed} />
                   </li>
