@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, ChevronsUpDown, Plus, Settings2 } from "lucide-react";
 import {
   DropdownMenu,
@@ -15,8 +15,11 @@ import { ManageAccountsDialog } from "@/components/manage-accounts-dialog";
 import { useAccount } from "@/lib/account-context";
 import { platformMeta, statusMeta, type AccountPlatform } from "@/lib/accounts";
 import { cn } from "@/lib/utils";
+import { apiFetch } from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
 
 const PLATFORM_ORDER: AccountPlatform[] = ["GOOGLE_ADS", "META_ADS"];
+type Company = { id: string; name: string; status: string; document?: string | null };
 
 /**
  * Account switcher shown under the Metrik logo in the sidebar. Lists the
@@ -25,8 +28,21 @@ const PLATFORM_ORDER: AccountPlatform[] = ["GOOGLE_ADS", "META_ADS"];
  */
 export function AccountSwitcher({ collapsed }: { collapsed: boolean }) {
   const { accounts, activeAccount, setActiveAccount } = useAccount();
+  const { isAdmin } = useAuth();
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
   const [addOpen, setAddOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    apiFetch<{ data: Company[] }>('/companies').then(({ data }) => setCompanies(data)).catch(() => setCompanies([]));
+  }, [isAdmin]);
+
+  function chooseCompany(companyId: string) {
+    setSelectedCompanyId(companyId);
+    window.localStorage.setItem('metrik:active-company-id', companyId);
+  }
 
   return (
     <>
@@ -54,7 +70,19 @@ export function AccountSwitcher({ collapsed }: { collapsed: boolean }) {
           </button>
         </DropdownMenuTrigger>
 
-        <DropdownMenuContent align="start" sideOffset={6} className="w-64">
+        <DropdownMenuContent align="start" sideOffset={6} className="w-80">
+          {isAdmin && companies.length > 0 && <>
+            <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">Empresas clientes</DropdownMenuLabel>
+            <div className="space-y-1 px-1 pb-2">
+              {companies.map((company) => {
+                const selected = selectedCompanyId === company.id;
+                return <div key={company.id} className={cn('rounded-lg border p-2', selected ? 'border-violet/40 bg-violet/5' : 'border-border')}>
+                  <div className="flex items-center gap-2"><div className="min-w-0 flex-1"><p className="truncate text-xs font-semibold">{company.name}</p><p className="truncate text-[10px] text-muted-foreground">{company.document || 'CNPJ pendente'} · {company.status}</p></div><button type="button" className="rounded-md px-1.5 py-1 text-[10px] font-medium text-violet hover:bg-violet/10" onClick={() => { chooseCompany(company.id); setAddOpen(true); }}>Adicionar</button><button type="button" className="rounded-md px-1.5 py-1 text-[10px] font-medium text-muted-foreground hover:bg-accent" onClick={() => { chooseCompany(company.id); setManageOpen(true); }}>Gerenciar</button></div>
+                </div>;
+              })}
+            </div>
+            <DropdownMenuSeparator />
+          </>}
           {PLATFORM_ORDER.map((p) => {
             const group = accounts.filter((a) => a.platform === p);
             if (!group.length) return null;

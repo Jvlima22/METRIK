@@ -29,6 +29,8 @@ type AddAccountInput = {
   accountId: string;
   currency?: string;
   figmaFileKey?: string;
+  companyId?: string;
+  companyName?: string;
 };
 
 type AccountContextValue = {
@@ -60,6 +62,8 @@ export function AccountProvider({ children }: { children: ReactNode }) {
             return {
               ...a,
               figmaFileKey: a.figmaFileKey ?? seed.figmaFileKey,
+              companyId: a.companyId,
+              companyName: a.companyName,
               claudeProjectId: a.claudeProjectId ?? seed.claudeProjectId,
               brandKey: a.brandKey ?? seed.brandKey,
             };
@@ -109,6 +113,8 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       status: "pending",
       currency: input.currency ?? "BRL",
       figmaFileKey: input.figmaFileKey?.trim() || undefined,
+      companyId: input.companyId,
+      companyName: input.companyName?.trim() || undefined,
     };
     setAccounts((prev) => [...prev, acc]);
     setActiveId(acc.id);

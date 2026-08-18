@@ -28,6 +28,9 @@ export type AdAccount = {
   figmaFileKey?: string;
   /** Claude Design project id (claude.ai/design) for this account's creatives. */
   claudeProjectId?: string;
+  /** Empresa cliente responsável por esta conta Ads. */
+  companyId?: string;
+  companyName?: string;
   /** Empresa por trás da conta — escolhe o conjunto de dados mock brandeado. */
   brandKey?: BrandKey;
 };
