@@ -19,9 +19,10 @@ const slotPositions = ["left-1/2 top-0 -translate-x-1/2", "right-[12%] top-[14%]
 const logoSlugs: Record<string, string> = { openai: "openai", claude: "claude", manus: "manus", kimi: "kimi", pipedrive: "pipedrive", "google-ads": "googleads", "meta-ads": "meta", "custom-api": "api" };
 
 function ProviderLogo({ provider, size = 30 }: { provider: IntegrationDefinition; size?: number }) {
+  const assets: Record<string, string> = { openai: "chatgpt.png", manus: "manus.png", claude: "claude.png", kimi: "kimi.png", pipedrive: "pipedrive.png", "google-ads": "google-ads.png", "meta-ads": "meta-ads.png" };
   const marks: Record<string, string> = { openai: "✦", claude: "C", manus: "M", kimi: "K", pipedrive: "P", "google-ads": "G", "meta-ads": "∞", "custom-api": "↗" };
-  const mark = marks[provider.id] ?? provider.name.slice(0, 1).toUpperCase();
-  return <div className="flex shrink-0 items-center justify-center rounded-xl p-1.5 shadow-sm" style={{ width: size + 12, height: size + 12, backgroundColor: provider.accent }} aria-label={provider.name}><svg width={size} height={size} viewBox="0 0 40 40" role="img" aria-hidden="true"><circle cx="20" cy="20" r="19" fill="rgba(255,255,255,0.18)" /><text x="20" y="26" textAnchor="middle" fontSize="18" fontWeight="700" fill="white" fontFamily="Arial, sans-serif">{mark}</text></svg><span className="sr-only">{provider.name}</span></div>;
+  const asset = assets[provider.id];
+  return <div className="flex shrink-0 items-center justify-center rounded-xl bg-white p-1.5 shadow-sm" style={{ width: size + 12, height: size + 12 }} aria-label={provider.name}>{asset ? <img src={"/integrations/" + asset} alt={provider.name + " logo"} width={size} height={size} className="h-full w-full object-contain" onError={(event) => { event.currentTarget.style.display = "none"; const fallback = event.currentTarget.nextElementSibling as HTMLElement | null; if (fallback) fallback.style.display = "block"; }} /> : null}<span className="text-sm font-bold text-slate-700" style={{ display: asset ? "none" : "block" }}>{marks[provider.id] ?? provider.name.slice(0, 1).toUpperCase()}</span><span className="sr-only">{provider.name}</span></div>;
 }
 
 function AdsOverview() {
