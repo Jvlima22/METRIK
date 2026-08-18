@@ -15,7 +15,8 @@ import {
 } from "@/components/ui/dialog";
 import { violationsForAccount, type ViolationPayload, getCreative } from "@/lib/mock-data";
 import { getPolicy, relativeTime } from "@/lib/activity";
-import { useAccount } from "@/lib/account-context";
+import { EMPTY_ACCOUNT, useAccount } from "@/lib/account-context";
+import { useAuth } from "@/lib/auth-context";
 import { platformMeta } from "@/lib/accounts";
 
 /** YYYY-MM-DD de hoje e de N dias atrás (default do filtro de data). */
@@ -53,10 +54,12 @@ function ViolationsPage() {
   const [policyOpen, setPolicyOpen] = useState(false);
 
   // Violações isoladas por conta — derivadas dos criativos da própria conta.
-  const { activeAccount } = useAccount();
+  const { activeAccount, activeCompanyId } = useAccount();
+  const { isAdmin } = useAuth();
+  const showAdminDemo = isAdmin && !activeCompanyId && activeAccount.id !== EMPTY_ACCOUNT.id;
   const scoped = useMemo(
-    () => violationsForAccount(activeAccount),
-    [activeAccount],
+    () => showAdminDemo ? violationsForAccount(activeAccount) : [],
+    [activeAccount, showAdminDemo],
   );
 
   const types = useMemo(() => Array.from(new Set(scoped.map((v) => v.violationType))), [scoped]);

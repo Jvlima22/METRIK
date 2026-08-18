@@ -20,6 +20,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { ActivityFeedPanel } from "@/components/activity-feed-panel";
 import { AccountSwitcher } from "@/components/account-switcher";
+import { useAccount } from "@/lib/account-context";
 import { MobileAccountSwitcher } from "@/components/mobile-account-switcher";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import {
@@ -102,7 +103,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteMode, setInviteMode] = useState<'COMPANY' | 'MEMBER'>('MEMBER');
   const [collapsed, setCollapsed] = useState(false);
-  const unread = activityFeed.filter((e) => e.kind === "violation" || e.kind === "auto_pause").length;
+  const { activeCompanyId } = useAccount();
+  const unread = isAdmin && !activeCompanyId ? activityFeed.filter((e) => e.kind === "violation" || e.kind === "auto_pause").length : 0;
 
   // Gate: sem sessão, manda pro login. Quando o Supabase não está configurado
   // deixamos o app abrir (modo demo) para não travar o desenvolvimento.

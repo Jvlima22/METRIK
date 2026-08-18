@@ -7,12 +7,18 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import { activityFeed, activityIcon, activityTone, relativeTime } from "@/lib/activity";
+import { useAuth } from "@/lib/auth-context";
+import { useAccount } from "@/lib/account-context";
 
 /**
  * Slide-over feed of recent worker/compliance events. Opened from the bell
  * button in the AppShell header.
  */
 export function ActivityFeedPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { isAdmin } = useAuth();
+  const { activeCompanyId } = useAccount();
+  const visibleFeed = isAdmin && !activeCompanyId ? activityFeed : [];
+
   return (
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
       <SheetContent side="right" className="w-full sm:max-w-md p-0 bg-white/95 backdrop-blur-xl">
@@ -29,7 +35,8 @@ export function ActivityFeedPanel({ open, onClose }: { open: boolean; onClose: (
           <div className="relative">
             <div className="absolute left-[15px] top-2 bottom-2 w-px bg-gradient-to-b from-violet/30 via-border to-transparent" />
             <div className="space-y-3">
-              {activityFeed.map((ev, i) => {
+              {visibleFeed.length === 0 && <div className="rounded-lg border border-dashed border-border p-4 text-center text-xs text-muted-foreground">Nenhuma atividade registrada para esta empresa.</div>}
+              {visibleFeed.map((ev, i) => {
                 const Icon = activityIcon[ev.kind];
                 const tone = activityTone[ev.kind];
                 return (

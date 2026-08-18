@@ -134,6 +134,17 @@ function isoDaysAgo(n: number): string {
   return d.toISOString().slice(0, 10);
 }
 
+const EMPTY_TREND = Array.from({ length: 14 }, (_, i) => {
+  const iso = isoDaysAgo(13 - i);
+  return { iso, date: iso.slice(5, 10), impressions: 0, clicks: 0, engagement: 0, conversions: 0, cost: 0 };
+});
+
+const EMPTY_DEVICE_MIX = [
+  { name: "Mobile", value: 0 },
+  { name: "Desktop", value: 0 },
+  { name: "Tablet", value: 0 },
+];
+
 const complianceDot: Record<string, string> = {
   ok: "bg-emerald-500 shadow-[0_0_0_3px_rgba(16,185,129,0.18)]",
   warning: "bg-amber-500 shadow-[0_0_0_3px_rgba(245,158,11,0.18)]",
@@ -196,7 +207,7 @@ function DashboardPage() {
 
   const scopedTrend = useMemo(
     () => {
-      if (!showAdminDemo) return [];
+      if (!showAdminDemo) return EMPTY_TREND;
       return mockTrend.map((d) => ({
         ...d,
         impressions: Math.round(d.impressions * scale),
@@ -209,7 +220,7 @@ function DashboardPage() {
     [scale, showAdminDemo],
   );
 
-  const scopedDeviceMix = showAdminDemo ? deviceMix : [];
+  const scopedDeviceMix = showAdminDemo ? deviceMix : EMPTY_DEVICE_MIX;
 
   // Recorta a série temporal pelo intervalo De/Até (filtro de data funcional).
   const filteredTrend = useMemo(
@@ -261,11 +272,11 @@ function DashboardPage() {
     };
   }, [filtered]);
 
-  const costByCampaign = filtered.map(({ c }) => ({
+  const costByCampaign = filtered.length ? filtered.map(({ c }) => ({
     name: c.campaignName.split(" — ")[0].slice(0, 14),
     custo: +(c.costMicros / 1_000_000).toFixed(0),
     conversoes: c.conversions,
-  }));
+  })) : [{ name: "Sem dados", custo: 0, conversoes: 0 }];
 
   return (
     <AppShell>

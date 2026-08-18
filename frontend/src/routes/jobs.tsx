@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { mockJob, violationsForAccount, type JobStatus } from "@/lib/mock-data";
 import { activityFeed, activityIcon, activityTone, relativeTime } from "@/lib/activity";
-import { useAccount } from "@/lib/account-context";
+import { EMPTY_ACCOUNT, useAccount } from "@/lib/account-context";
+import { useAuth } from "@/lib/auth-context";
 
 export const Route = createFileRoute("/jobs")({
   head: () => ({
@@ -52,7 +53,9 @@ const statusBadge: Record<JobStatus["status"], { cls: string; icon: any; label: 
 };
 
 function JobsPage() {
-  const { activeAccount } = useAccount();
+  const { activeAccount, activeCompanyId } = useAccount();
+  const { isAdmin } = useAuth();
+  const showAdminDemo = isAdmin && !activeCompanyId && activeAccount.id !== EMPTY_ACCOUNT.id;
   const [jobId, setJobId] = useState("");
   const [result, setResult] = useState<JobStatus | null>(null);
   const [loading, setLoading] = useState(false);
@@ -60,6 +63,7 @@ function JobsPage() {
   const runJob = (id: string) => {
     const v = id.trim();
     if (!v) return;
+    if (!showAdminDemo) { setResult(null); return; }
     setJobId(v);
     setLoading(true);
     setTimeout(() => { setResult(mockJob(v)); setLoading(false); }, 600);
@@ -68,10 +72,11 @@ function JobsPage() {
 
   // jobIds reais desta conta: jobId = `${tenantId}__${adId}` (idempotência).
   const exampleJobIds = useMemo(
-    () => violationsForAccount(activeAccount).slice(0, 3).map((v) => `${v.tenantId}__${v.adId}`),
-    [activeAccount],
+    () => showAdminDemo ? violationsForAccount(activeAccount).slice(0, 3).map((v) => `${v.tenantId}__${v.adId}`) : [],
+    [activeAccount, showAdminDemo],
   );
 
+  const visibleActivity = showAdminDemo ? activityFeed.slice(0, 6) : [];
   const currentIdx = result ? statusToStageIndex(result.status) : -1;
   const failed = result?.status === "failed";
 
@@ -283,7 +288,8 @@ function JobsPage() {
             <div className="relative">
               <div className="absolute left-[15px] top-2 bottom-2 w-px bg-gradient-to-b from-violet/30 via-border to-transparent" />
               <div className="space-y-3">
-                {activityFeed.slice(0, 6).map((ev, i) => {
+                {visibleActivity.length === 0 && <p className="rounded-lg border border-dashed border-border p-4 text-center text-xs text-muted-foreground">Nenhum evento registrado para esta empresa.</p>}
+                {visibleActivity.map((ev, i) => {
                   const Icon = activityIcon[ev.kind];
                   const tone = activityTone[ev.kind];
                   return (
