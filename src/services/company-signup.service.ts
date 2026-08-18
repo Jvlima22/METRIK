@@ -36,12 +36,26 @@ export async function createCompanySignupInvite(input: { email: string; provisio
   if (!email.includes('@')) throw new AppError('E-mail de convite inválido', 400);
   const token = randomBytes(32).toString('hex');
   const supabase = getSupabaseAdmin();
+  const { data: users } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 });
+  const existingUser = users?.users.find((user) => user.email?.toLowerCase() === email);
+  if (existingUser) {
+    const { data: memberships } = await supabase.from('company_members').select('company_id').eq('user_id', existingUser.id).eq('status', 'ACTIVE').limit(1);
+    if (memberships?.length) throw new AppError('Este e-mail já está vinculado a uma empresa no Metrik.', 409);
+    throw new AppError('Este e-mail já possui uma conta no Metrik. Use o convite de membro ou entre com a conta existente.', 409);
+  }
   await supabase.from('company_signup_invitations').update({ status: 'REVOKED', revoked_at: new Date().toISOString() }).eq('email', email).in('status', ['PENDING', 'OPENED']);
   const { data: invite, error } = await supabase.from('company_signup_invitations').insert({ email, provisional_name: input.provisionalName?.trim() || null, token_hash: hashToken(token), invited_by: input.invitedBy, status: 'PENDING', expires_at: new Date(Date.now() + INVITE_TTL_HOURS * 60 * 60 * 1000).toISOString() }).select('id,email,provisional_name,status,expires_at,created_at').single();
   if (error || !invite) throw new AppError(`Não foi possível criar convite: ${error?.message ?? 'registro vazio'}`, 500);
   const redirectTo = `${env.FRONTEND_ORIGIN}/company-onboarding?token=${token}`;
   const { error: authError } = await supabase.auth.admin.inviteUserByEmail(email, { redirectTo, data: { company_invitation_id: invite.id } });
-  if (authError) throw new AppError(`Convite criado, mas não foi enviado: ${authError.message}`, 502);
+  if (authError) {
+    await supabase.from('company_signup_invitations').update({ status: 'REVOKED', revoked_at: new Date().toISOString() }).eq('id', invite.id);
+    const message = authError.message.toLowerCase();
+    if (message.includes('rate limit') || message.includes('rate_limit') || message.includes('too many')) {
+      throw new AppError('O Supabase atingiu o limite temporário de envio de e-mails. Aguarde e tente novamente mais tarde; nenhum convite foi mantido.', 429);
+    }
+    throw new AppError(`O convite não foi enviado pelo Supabase: ${authError.message}`, 502);
+  }
   return { ...invite, inviteUrl: redirectTo };
 }
 

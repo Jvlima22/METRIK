@@ -23,8 +23,11 @@ export async function getCompanySignupInvite(req: Request, res: Response, next: 
 export async function postCompanySignupComplete(req: Request, res: Response, next: NextFunction) {
   try {
     const body = req.body ?? {};
-    const required = ['token', 'password', 'fullName', 'legalName', 'cnpj', 'companyEmail'];
+    const required = ['token', 'password', 'fullName', 'tradeName'];
     for (const field of required) if (typeof body[field] !== 'string' || !body[field].trim()) throw new AppError(`${field} é obrigatório`, 400);
+    for (const field of ['cnpj', 'legalName', 'companyEmail']) {
+      if (body[field] !== undefined && typeof body[field] !== 'string') throw new AppError(`${field} inválido`, 400);
+    }
     res.status(201).json({ data: await completeCompanySignup(body) });
   } catch (error) { next(error); }
 }
