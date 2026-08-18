@@ -116,7 +116,7 @@ curl -X POST \
   http://localhost:3000/integrations/connections/CONNECTION_ID/test
 ```
 
-O teste atual é um health check seguro de metadados e marca a conexão como verificada. Ele ainda não chama os provedores externos. Os adaptadores OAuth e API key reais serão adicionados depois da configuração das credenciais e aplicativos de cada provedor.
+O teste sem credencial é um health check seguro de metadados e mantém a conexão em `DRAFT`. Quando uma API key/token é informado, o backend executa uma chamada real somente de leitura: lista modelos na OpenAI, lista modelos na Claude e Kimi, ou consulta a lista de tarefas do Manus. Nenhuma ação de escrita é executada. Pipedrive, Google Ads, Meta Ads e OAuth continuam aguardando os adaptadores e callbacks específicos de cada provedor.
 
 ## 6. Configurar OAuth posteriormente
 
