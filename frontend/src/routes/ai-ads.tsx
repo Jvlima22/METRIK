@@ -63,13 +63,31 @@ function HubTab() {
   const [managementError, setManagementError] = useState<string | null>(null);
   const [managementMenuOpen, setManagementMenuOpen] = useState(false);
   useEffect(() => {
-    if (!activeCompanyId) return;
+    if (!activeCompanyId) {
+      setConnections(emptyConnections());
+      setBackendIds({});
+      setConnectedSlot(null);
+      setActiveSlot(null);
+      setConnectedAccounts([]);
+      setSyncRuns([]);
+      setManagementError(null);
+      setManagementMenuOpen(false);
+      return;
+    }
     const cached = readHubCache();
-    if (cached) { setConnections(cached.connections); setBackendIds(cached.backendIds); }
+    setConnections(cached?.connections ?? emptyConnections());
+    setBackendIds(cached?.backendIds ?? {});
+    setConnectedSlot(null);
+    setActiveSlot(null);
+    setConnectedAccounts([]);
+    setSyncRuns([]);
+    setManagementError(null);
+    setManagementMenuOpen(false);
     setConnectionsReady(false);
     apiFetch<{ data: Array<{ id: string; provider: string; status: HubConnection["status"]; scopes?: string[]; workspace_name?: string; metadata?: { direction?: IntegrationDirection }; updated_at?: string }> }>("/integrations/connections")
       .then(({ data }) => {
-        setConnections((current) => current.map((slot, index) => { const item = data[index]; return item ? { ...slot, providerId: item.provider, status: item.status, scopes: item.scopes ?? [], workspace: item.workspace_name ?? undefined, direction: item.metadata?.direction, updatedAt: item.updated_at } : slot; }));
+        const next = emptyConnections().map((slot, index) => { const item = data[index]; return item ? { ...slot, providerId: item.provider, status: item.status, scopes: item.scopes ?? [], workspace: item.workspace_name ?? undefined, direction: item.metadata?.direction, updatedAt: item.updated_at } : slot; });
+        setConnections(next);
         setBackendIds(Object.fromEntries(data.slice(0, 8).map((item, index) => [index, item.id])));
       })
       .catch(() => undefined)
