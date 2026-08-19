@@ -104,6 +104,13 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   function setActiveCompanyId(id: string | null) {
     setActiveCompanyIdState(id);
     setActiveId(EMPTY_ACCOUNT.id);
+    if (user && typeof window !== 'undefined') {
+      try {
+        if (id) window.localStorage.setItem(companyKey, id);
+        else window.localStorage.removeItem(companyKey);
+        window.localStorage.removeItem('metrik:active-company-id');
+      } catch { /* armazenamento opcional */ }
+    }
   }
 
   function setActiveAccount(id: string) { setActiveId(id); }

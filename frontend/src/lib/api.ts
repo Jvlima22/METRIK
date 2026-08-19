@@ -15,13 +15,9 @@ export async function apiFetch<T = unknown>(
   const supabase = getSupabaseClient();
   const { data } = (await supabase?.auth.getSession()) ?? { data: { session: null } };
   const token = data.session?.access_token;
-  const activeCompanyId = typeof window !== 'undefined'
-    ? (() => {
-      const legacy = window.localStorage.getItem('metrik:active-company-id');
-      if (legacy) return legacy;
-      const scopedKey = Object.keys(window.localStorage).find((key) => key.startsWith('metrik:') && key.endsWith(':active-company'));
-      return scopedKey ? window.localStorage.getItem(scopedKey) : null;
-    })()
+  const userId = data.session?.user?.id;
+  const activeCompanyId = typeof window !== 'undefined' && userId
+    ? window.localStorage.getItem(`metrik:${userId}:active-company`)
     : null;
 
   const res = await fetch(`${API_URL}${path}`, {
