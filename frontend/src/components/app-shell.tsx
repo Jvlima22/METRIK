@@ -24,6 +24,8 @@ import { useAccount } from "@/lib/account-context";
 import { CompanyFirstAccessOnboarding } from "@/components/company-first-access-onboarding";
 import { MobileAccountSwitcher } from "@/components/mobile-account-switcher";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+
+const FRONTEND_URL = (import.meta.env.VITE_FRONTEND_URL as string | undefined) ?? "https://metrik-ai.vercel.app";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -166,10 +168,14 @@ export function AppShell({ children }: { children: ReactNode }) {
         {/* Brand */}
         <div className={cn("flex items-center gap-3 p-5", collapsed && "justify-center px-0")}>
           {collapsed ? (
-            <img src="/logo-ilustration.png" alt="Metrik" className="size-9 object-contain shrink-0" />
+            <a href={FRONTEND_URL} aria-label="Ir para o frontend do Metrik" className="rounded-lg transition-opacity hover:opacity-75">
+              <img src="/logo-ilustration.png" alt="Metrik" className="size-9 object-contain shrink-0" />
+            </a>
           ) : (
             <div className="flex flex-col gap-1">
-              <img src="/logo-METRIK.png" alt="Metrik" className="h-7 w-auto object-contain" />
+              <a href={FRONTEND_URL} aria-label="Ir para o frontend do Metrik" className="inline-flex rounded-lg transition-opacity hover:opacity-75">
+                <img src="/logo-METRIK.png" alt="Metrik" className="h-7 w-auto object-contain" />
+              </a>
               <p className="text-[11px] text-muted-foreground">Control Center</p>
             </div>
           )}
