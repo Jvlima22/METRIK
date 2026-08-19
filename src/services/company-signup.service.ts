@@ -70,7 +70,7 @@ export async function createCompanySignupInvite(input: { email: string; provisio
   const { data: invite, error } = await supabase.from('company_signup_invitations').insert({ email, provisional_name: input.provisionalName?.trim() || null, token_hash: hashToken(token), invited_by: input.invitedBy, status: 'PENDING', expires_at: new Date(Date.now() + INVITE_TTL_HOURS * 60 * 60 * 1000).toISOString() }).select('id,email,provisional_name,status,expires_at,created_at').single();
   if (error || !invite) throw new AppError(`Não foi possível criar convite: ${error?.message ?? 'registro vazio'}`, 500);
   const redirectTo = `${env.FRONTEND_ORIGIN}/company-onboarding?token=${token}`;
-  const { error: authError } = await supabase.auth.admin.inviteUserByEmail(email, { redirectTo, data: { company_invitation_id: invite.id } });
+  const { error: authError } = await supabase.auth.admin.inviteUserByEmail(email, { redirectTo, data: { company_invitation_id: invite.id, company_signup_token: token } });
   if (authError) {
     await supabase.from('company_signup_invitations').update({ status: 'REVOKED', revoked_at: new Date().toISOString() }).eq('id', invite.id);
     const message = authError.message.toLowerCase();

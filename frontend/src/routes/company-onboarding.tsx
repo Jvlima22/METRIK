@@ -30,9 +30,16 @@ const emptyForm: FormState = {
   companyEmail: '',
 };
 
+function readInviteToken() {
+  if (typeof window === 'undefined') return '';
+  const queryToken = new URLSearchParams(window.location.search).get('token');
+  const hashToken = new URLSearchParams(window.location.hash.replace(/^#/, '')).get('token');
+  return queryToken || hashToken || window.sessionStorage.getItem('metrik:company-signup-token') || '';
+}
+
 function CompanyOnboardingPage() {
   const navigate = useNavigate();
-  const token = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '').get('token') ?? '';
+  const [token, setToken] = useState(readInviteToken);
   const [invite, setInvite] = useState<Invite | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [step, setStep] = useState<1 | 2>(1);
@@ -73,21 +80,40 @@ function CompanyOnboardingPage() {
   }
 
   useEffect(() => {
-    if (!token) {
-      setError('Link de convite ausente.');
-      setLoading(false);
-      return;
-    }
-
-    apiFetch<{ data: Invite }>(`/company-signup/invite?token=${encodeURIComponent(token)}`)
-      .then(({ data }) => {
+    let cancelled = false;
+    async function loadInvite() {
+      let resolvedToken = token;
+      if (!resolvedToken) {
+        const supabase = getSupabaseClient();
+        const { data: userData } = supabase ? await supabase.auth.getUser() : { data: { user: null } };
+        const metadataToken = userData.user?.user_metadata?.company_signup_token;
+        if (typeof metadataToken === 'string' && metadataToken.length >= 32) {
+          resolvedToken = metadataToken;
+          setToken(metadataToken);
+          window.sessionStorage.setItem('metrik:company-signup-token', metadataToken);
+        }
+      }
+      if (!resolvedToken) {
+        if (!cancelled) setError('Link de convite ausente ou redirecionado sem o token. Solicite um novo convite ao administrador.');
+        if (!cancelled) setLoading(false);
+        return;
+      }
+      try {
+        const { data } = await apiFetch<{ data: Invite }>(`/company-signup/invite?token=${encodeURIComponent(resolvedToken)}`);
+        if (cancelled) return;
         setInvite(data);
         setField('companyEmail', data.email);
         if (data.provisionalName) setField('tradeName', data.provisionalName);
-      })
-      .catch((cause) => setError(cause instanceof Error ? cause.message : 'Convite inválido ou expirado'))
-      .finally(() => setLoading(false));
-  }, [token]);
+        window.sessionStorage.setItem('metrik:company-signup-token', resolvedToken);
+      } catch (cause) {
+        if (!cancelled) setError(cause instanceof Error ? cause.message : 'Convite inválido ou expirado');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    void loadInvite();
+    return () => { cancelled = true; };
+  }, []);
 
   function nextStep() {
     if (!form.fullName.trim() || form.password.length < 8 || form.password !== form.confirmPassword) {

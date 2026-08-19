@@ -38,7 +38,7 @@ const emptyAnswers: Answers = { primaryGoal: '', adChannels: [], conversionEvent
 export function CompanyFirstAccessOnboarding() {
   const { isAdmin } = useAuth();
   const { activeCompanyId, setActiveCompanyId } = useAccount();
-  const [status, setStatus] = useState<'idle' | 'loading' | 'ready' | 'complete' | 'error'>('idle');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'ready' | 'complete' | 'error'>('loading');
   const [stepIndex, setStepIndex] = useState(0);
   const [answers, setAnswers] = useState<Answers>(emptyAnswers);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -69,7 +69,7 @@ export function CompanyFirstAccessOnboarding() {
   }, [activeCompanyId, isAdmin, setActiveCompanyId]);
 
   useEffect(() => {
-    if (status !== 'ready' && status !== 'complete') return;
+    if (status !== 'loading' && status !== 'ready' && status !== 'complete') return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const context = canvas.getContext('2d');
@@ -105,7 +105,7 @@ export function CompanyFirstAccessOnboarding() {
     return answers[currentStep.key as Exclude<StepKey, 'adChannels'>];
   }, [answers, currentStep.key]);
 
-  if (isAdmin || (status !== 'ready' && status !== 'complete')) return null;
+  if (isAdmin || (status !== 'loading' && status !== 'ready' && status !== 'complete')) return null;
 
   function choose(option: string) {
     if (currentStep.key === 'adChannels') setAnswers((current) => ({ ...current, adChannels: [option] }));
@@ -136,7 +136,7 @@ export function CompanyFirstAccessOnboarding() {
           <img className="company-onboarding-mark" src="/logo-ilustration-white.png" alt="" />
           <img className="company-onboarding-wordmark" src="/logo-METRIK-white.png" alt="" />
         </div>
-      ) : (
+      ) : status === 'ready' ? (
         <div className="company-onboarding-card">
           <div className="company-onboarding-meta"><span>METRIK INTELLIGENCE</span><span>{String(stepIndex + 1).padStart(2, '0')} / 04</span></div>
           <h1>{currentStep.title}</h1>
@@ -146,7 +146,7 @@ export function CompanyFirstAccessOnboarding() {
           </div>
           <div className="company-onboarding-footer"><button type="button" onClick={goBack} disabled={stepIndex === 0}>Voltar</button><div className="company-onboarding-dots">{steps.map((_, index) => <span key={index} className={index <= stepIndex ? 'active' : ''} />)}</div></div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
