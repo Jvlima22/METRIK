@@ -5,7 +5,7 @@ import { AppError } from '../utils/AppError';
 import type { CompanyRole } from '../types/express';
 import { validateCnpj } from './cnpj-validation.service';
 import { seedPendingCompanyOnboarding } from './company-onboarding.service';
-import { describeError, describeErrorCode } from '../utils/error-message';
+import { describeError, describeErrorCode, describeErrorMetadata } from '../utils/error-message';
 
 const INVITE_TTL_HOURS = 72;
 
@@ -76,7 +76,7 @@ export async function createCompanySignupInvite(input: { email: string; provisio
     await supabase.from('company_signup_invitations').update({ status: 'REVOKED', revoked_at: new Date().toISOString() }).eq('id', invite.id);
     const errorMessage = describeError(authError);
     const errorCode = describeErrorCode(authError);
-    console.error('[auth/invite] Supabase rejeitou convite de empresa', { code: errorCode, message: errorMessage });
+    console.error('[auth/invite] Supabase rejeitou convite de empresa', { ...describeErrorMetadata(authError), message: errorMessage });
     const message = errorMessage.toLowerCase();
     if (message.includes('rate limit') || message.includes('rate_limit') || message.includes('too many')) {
       throw new AppError('O Supabase atingiu o limite temporário de envio de e-mails. Aguarde e tente novamente mais tarde; nenhum convite foi mantido.', 429);

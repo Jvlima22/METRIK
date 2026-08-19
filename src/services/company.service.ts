@@ -2,7 +2,7 @@ import { getSupabaseAdmin } from '../lib/supabase';
 import { env } from '../config/env';
 import { AppError } from '../utils/AppError';
 import type { CompanyRole } from '../types/express';
-import { describeError, describeErrorCode } from '../utils/error-message';
+import { describeError, describeErrorCode, describeErrorMetadata } from '../utils/error-message';
 
 function slugify(value: string): string {
   const slug = value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 80);
@@ -47,7 +47,7 @@ export async function inviteToCompany(companyId: string, email: string, role: Co
     await supabase.from('company_invitations').update({ status: 'REVOKED' }).eq('id', invite.id);
     const errorMessage = describeError(authError);
     const errorCode = describeErrorCode(authError);
-    console.error('[auth/invite] Supabase rejeitou convite de membro', { code: errorCode, message: errorMessage });
+    console.error('[auth/invite] Supabase rejeitou convite de membro', { ...describeErrorMetadata(authError), message: errorMessage });
     const message = errorMessage.toLowerCase();
     if (message.includes('rate limit') || message.includes('rate_limit') || message.includes('too many')) {
       throw new AppError('O Supabase atingiu o limite temporário de envio de e-mails. Aguarde e tente novamente mais tarde; nenhum convite foi mantido.', 429);
