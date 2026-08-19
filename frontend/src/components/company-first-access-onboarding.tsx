@@ -34,11 +34,22 @@ type StepKey = typeof steps[number]['key'];
 type Answers = { primaryGoal: string; adChannels: string[]; conversionEvent: string; managementModel: string };
 
 const emptyAnswers: Answers = { primaryGoal: '', adChannels: [], conversionEvent: '', managementModel: '' };
+const onboardingCompletedPrefix = 'metrik:company-onboarding-completed:';
+
+function hasLocalOnboardingCompletion(companyId: string | null | undefined): boolean {
+  if (!companyId) return false;
+  try { return localStorage.getItem(`${onboardingCompletedPrefix}${companyId}`) === '1'; } catch { return false; }
+}
+
+function rememberOnboardingCompletion(companyId: string | null | undefined): void {
+  if (!companyId) return;
+  try { localStorage.setItem(`${onboardingCompletedPrefix}${companyId}`, '1'); } catch { /* ignore */ }
+}
 
 export function CompanyFirstAccessOnboarding() {
   const { isAdmin } = useAuth();
   const { activeCompanyId, setActiveCompanyId } = useAccount();
-  const [status, setStatus] = useState<'idle' | 'loading' | 'ready' | 'complete' | 'error'>('loading');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'ready' | 'complete' | 'error'>(() => hasLocalOnboardingCompletion(activeCompanyId) ? 'idle' : 'loading');
   const [stepIndex, setStepIndex] = useState(0);
   const [answers, setAnswers] = useState<Answers>(emptyAnswers);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -49,11 +60,19 @@ export function CompanyFirstAccessOnboarding() {
       return;
     }
     let cancelled = false;
+    if (hasLocalOnboardingCompletion(activeCompanyId)) {
+      setStatus('idle');
+      return () => { cancelled = true; };
+    }
     setStatus('loading');
     apiFetch<{ data: { eligible: boolean; profile: { company_id?: string; answers?: Answers; primary_goal?: string; ad_channels?: string[]; conversion_event?: string; management_model?: string } | null } }>('/company-onboarding/status')
       .then(({ data }) => {
         if (cancelled) return;
-        if (!data.eligible) { setStatus('idle'); return; }
+        if (!data.eligible) {
+          rememberOnboardingCompletion(data.profile?.company_id ?? activeCompanyId);
+          setStatus('idle');
+          return;
+        }
         const profile = data.profile;
         if (profile?.company_id && profile.company_id !== activeCompanyId) setActiveCompanyId(profile.company_id);
         setAnswers({
@@ -140,6 +159,7 @@ export function CompanyFirstAccessOnboarding() {
     try {
       setStatus('complete');
       await apiFetch('/company-onboarding/complete', { method: 'POST', body: JSON.stringify({ ...nextAnswers, answers: nextAnswers, formVersion: 'ads-onboarding-v1' }) });
+      rememberOnboardingCompletion(activeCompanyId);
       window.setTimeout(() => setStatus('idle'), 4300);
     } catch {
       // O onboarding continua bloqueando o sistema até o envio ser confirmado.
