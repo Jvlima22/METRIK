@@ -39,6 +39,10 @@ export function AccountSwitcher({ collapsed }: { collapsed: boolean }) {
     apiFetch<{ data: Company[] }>('/companies').then(({ data }) => setCompanies(data)).catch(() => setCompanies([]));
   }, [isAdmin]);
 
+  useEffect(() => {
+    setSelectedCompanyId(activeCompanyId);
+  }, [activeCompanyId]);
+
   function chooseCompany(companyId: string) {
     setSelectedCompanyId(companyId);
     setActiveCompanyId(companyId);
