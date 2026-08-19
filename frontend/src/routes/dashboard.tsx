@@ -1,6 +1,6 @@
 ﻿import { createFileRoute } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Area,
   Bar,
@@ -54,6 +54,7 @@ import {
 import { EMPTY_ACCOUNT, useAccount } from "@/lib/account-context";
 import { useAuth } from "@/lib/auth-context";
 import { PLATFORM_DATA_KEY, accountScale, platformMeta } from "@/lib/accounts";
+import { apiFetch } from "@/lib/api";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -140,6 +141,14 @@ const EMPTY_TREND = Array.from({ length: 14 }, (_, i) => {
   return { iso, date: iso.slice(5, 10), impressions: 0, clicks: 0, engagement: 0, conversions: 0, cost: 0 };
 });
 
+type RealCampaignMetrics = CampaignMetrics & { platform: "GOOGLE_ADS" | "META_ADS" };
+
+type RealAdsMetrics = {
+  hasData: boolean;
+  campaigns: RealCampaignMetrics[];
+  trend: Array<{ iso: string; date: string; impressions: number; clicks: number; conversions: number; cost: number }>;
+};
+
 const EMPTY_DEVICE_MIX = [
   { name: "Mobile", value: 0 },
   { name: "Desktop", value: 0 },
@@ -178,6 +187,8 @@ function DashboardPage() {
   const [from, setFrom] = useState(isoDaysAgo(13));
   const [to, setTo] = useState(isoDaysAgo(0));
   const [selected, setSelected] = useState<CampaignMetrics | null>(null);
+  const [realMetrics, setRealMetrics] = useState<RealAdsMetrics | null>(null);
+  const [realMetricsError, setRealMetricsError] = useState<string | null>(null);
   const [inviteMemberOpen, setInviteMemberOpen] = useState(false);
 
   // Scope the dashboard to the active account: keep only its platform and
@@ -188,12 +199,24 @@ function DashboardPage() {
   const showAdminDemo = isAdmin && !activeCompanyId && activeAccount.id !== EMPTY_ACCOUNT.id && Boolean(activeAccount.brandKey);
   const performanceCardRef = useRef<HTMLDivElement>(null);
   const [exportingPerformance, setExportingPerformance] = useState(false);
+  useEffect(() => {
+    if (showAdminDemo || !activeCompanyId) {
+      setRealMetrics(null);
+      setRealMetricsError(null);
+      return;
+    }
+    setRealMetricsError(null);
+    apiFetch<{ data: RealAdsMetrics }>(`/integrations/ads/metrics?start=${from}&end=${to}`)
+      .then(({ data }) => setRealMetrics(data))
+      .catch((error) => setRealMetricsError(error instanceof Error ? error.message : "Não foi possível carregar métricas reais"));
+  }, [activeCompanyId, from, to, showAdminDemo]);
+
   const accountPlatform = PLATFORM_DATA_KEY[activeAccount.platform];
   const scale = accountScale(activeAccount.accountId);
 
   const scopedCampaigns = useMemo(
     () => {
-      if (!showAdminDemo) return [];
+      if (!showAdminDemo) return realMetrics?.campaigns ?? [];
       return campaignsForBrand(activeAccount.brandKey)
         .filter((c) => getCreative(c.campaignId).platform === accountPlatform)
         .map((c) => ({
@@ -204,12 +227,12 @@ function DashboardPage() {
           conversions: Math.round(c.conversions * scale),
         }));
     },
-    [accountPlatform, scale, activeAccount.brandKey, showAdminDemo],
+    [accountPlatform, scale, activeAccount.brandKey, showAdminDemo, realMetrics],
   );
 
   const scopedTrend = useMemo(
     () => {
-      if (!showAdminDemo) return EMPTY_TREND;
+      if (!showAdminDemo) return realMetrics?.trend ?? EMPTY_TREND;
       return mockTrend.map((d) => ({
         ...d,
         impressions: Math.round(d.impressions * scale),
@@ -219,7 +242,7 @@ function DashboardPage() {
         cost: Math.round(d.cost * scale),
       }));
     },
-    [scale, showAdminDemo],
+    [scale, showAdminDemo, realMetrics],
   );
 
   const scopedDeviceMix = showAdminDemo ? deviceMix : EMPTY_DEVICE_MIX;
@@ -241,8 +264,25 @@ function DashboardPage() {
   };
 
   const rows = useMemo(
-    () => scopedCampaigns.map((c) => ({ c, cr: getCreative(c.campaignId) })),
-    [scopedCampaigns],
+    () => scopedCampaigns.map((c) => ({
+      c,
+      cr: showAdminDemo ? getCreative(c.campaignId) : {
+        adId: c.campaignId,
+        platform: ("platform" in c && c.platform === "GOOGLE_ADS") ? "google-ads" as const : "meta-ads" as const,
+        brand: activeAccount.companyName ?? activeAccount.name,
+        headline: c.campaignName,
+        body: "Dados do criativo ainda não sincronizados.",
+        callToAction: "—",
+        image: "",
+        likes: 0,
+        comments: 0,
+        shares: 0,
+        engagementScore: 0,
+        compliance: "ok" as const,
+        recentComments: [],
+      },
+    })),
+    [activeAccount.companyName, activeAccount.name, scopedCampaigns, showAdminDemo],
   );
 
   const filtered = rows.filter(({ c, cr }) => {
@@ -325,16 +365,16 @@ function DashboardPage() {
               </div>
               <div className="flex-1">
                 <p className="text-[10px] uppercase tracking-wider font-bold text-violet">Resumo inteligente · hoje</p>
-                <p className="text-sm md:text-[15px] mt-1.5 leading-relaxed text-foreground/90">
-                  Suas campanhas no <strong className="text-foreground">Meta Ads</strong> performaram{" "}
-                  <strong className="text-emerald-700">15% melhor em conversões</strong>, mas o custo no{" "}
-                  <strong className="text-foreground">Google Ads</strong> subiu{" "}
-                  <strong className="text-rose-700">+8.4%</strong> devido a{" "}
-                  <strong className="text-rose-700">2 violações críticas</strong> que pausaram anúncios de alta performance.
-                </p>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Recomendação: revise os criativos pausados em <em>Performance Max</em> e reative com copy ajustado.
-                </p>
+                {showAdminDemo ? <>
+                  <p className="text-sm md:text-[15px] mt-1.5 leading-relaxed text-foreground/90">O modo demonstração apresenta exemplos ilustrativos. Conecte uma conta de anúncios para gerar um resumo com dados reais.</p>
+                  <p className="text-xs text-muted-foreground mt-2">As recomendações reais serão calculadas após a primeira sincronização.</p>
+                </> : realMetrics?.hasData ? <>
+                  <p className="text-sm md:text-[15px] mt-1.5 leading-relaxed text-foreground/90">Suas métricas reais foram sincronizadas entre <strong>{from}</strong> e <strong>{to}</strong>. O Metrik analisou {formatNumber(realMetrics.campaigns.length)} campanhas.</p>
+                  <p className="text-xs text-muted-foreground mt-2">Resumo inteligente e recomendações serão gerados a partir das variações reais entre períodos.</p>
+                </> : <>
+                  <p className="text-sm md:text-[15px] mt-1.5 leading-relaxed text-foreground/90">Ainda não há métricas reais sincronizadas para esta empresa.</p>
+                  <p className="text-xs text-muted-foreground mt-2">Conecte Google Ads ou Meta Ads no Hub de Integrações para começar.</p>
+                </>}
               </div>
             </div>
           </motion.div>
@@ -353,10 +393,8 @@ function DashboardPage() {
                 <span className="size-2 rounded-full bg-rose-500 animate-pulse shadow-[0_0_0_4px_rgba(244,63,94,0.2)]" />
                 <p className="text-[10px] uppercase tracking-wider font-bold text-rose-700">Ação necessária</p>
               </div>
-              <p className="text-sm font-semibold mt-2 leading-snug">
-                3 anúncios pausados automaticamente por <strong>Violação de Marca</strong>
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">Google Ads · últimos 30min · revisão urgente</p>
+              <p className="text-sm font-semibold mt-2 leading-snug">{showAdminDemo ? "Exemplos de alertas aparecem apenas no modo demonstração." : realMetrics?.hasData ? "Alertas reais serão exibidos após a análise de status e políticas." : "Nenhuma ação necessária: ainda não há dados sincronizados."}</p>
+              <p className="text-xs text-muted-foreground mt-1">{realMetricsError ?? (showAdminDemo ? "Dados ilustrativos do administrador." : "Conecte uma conta de anúncios para ativar os alertas.")}</p>
               <Link
                 to="/violations"
                 className="inline-flex items-center gap-1.5 mt-3 text-xs font-semibold text-rose-700 hover:gap-2.5 transition-all"
