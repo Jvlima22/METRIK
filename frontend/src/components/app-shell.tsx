@@ -64,7 +64,7 @@ const navSections: { group: string; items: NavItem[] }[] = [
       { to: "/creatives", label: "Criativos", icon: Images },
       { to: "/ai-ads", label: "Inteligencia de Ads", icon: Activity },
       { to: "/subscriptions", label: "Assinaturas", icon: CreditCard },
-      { to: "/company-settings", label: "Configuração da empresa", icon: Settings2 },
+      { to: "/company-settings", label: "Configuração", icon: Settings2 },
     ],
   },
 ];
@@ -291,14 +291,20 @@ export function AppShell({ children }: { children: ReactNode }) {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               {isAdmin && (
+                <DropdownMenuItem onClick={() => { setInviteMode('COMPANY'); setInviteOpen(true); }}>
+                  <Building2 className="size-4" />
+                  Convidar empresa
+                </DropdownMenuItem>
+              )}
+              {activeCompanyId && (
                 <>
-                  <DropdownMenuItem onClick={() => { setInviteMode('COMPANY'); setInviteOpen(true); }}>
-                    <Building2 className="size-4" />
-                    Convidar empresa
-                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => { setInviteMode('MEMBER'); setInviteOpen(true); }}>
                     <UserPlus className="size-4" />
                     Convidar membro
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate({ to: "/company-settings" })}>
+                    <Settings2 className="size-4" />
+                    Configurações
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                 </>
@@ -335,7 +341,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <CompanyFirstAccessOnboarding />
       </div>
       <ActivityFeedPanel open={feedOpen} onClose={() => setFeedOpen(false)} />
-      {isAdmin && <InviteUserDialog open={inviteOpen} onOpenChange={setInviteOpen} mode={inviteMode} />}
+      {(isAdmin || Boolean(activeCompanyId)) && <InviteUserDialog open={inviteOpen} onOpenChange={setInviteOpen} mode={inviteMode} initialCompanyId={activeCompanyId} />}
     </div>
   );
 }

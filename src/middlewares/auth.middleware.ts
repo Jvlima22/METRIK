@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { getSupabase } from '../lib/supabase';
+import { getSupabase, getSupabaseAdmin } from '../lib/supabase';
 import { env } from '../config/env';
 import { AppError } from '../utils/AppError';
 import { isGlobalAdmin } from './company.middleware';
@@ -41,15 +41,29 @@ export async function requireAuth(
  * contrário. É a barreira de segurança real dos convites — a UI esconde o botão
  * por conveniência, mas a verificação que importa é esta.
  */
-export function requireAdmin(
+export async function requireAdmin(
   req: Request,
   _res: Response,
   next: NextFunction,
-): void {
-  const email = req.user?.email?.toLowerCase();
-  if (!email || (!isGlobalAdmin(email) && !env.INVITE_ADMINS.includes(email))) {
-    next(new AppError('Acesso restrito a administradores', 403));
-    return;
-  }
-  next();
+): Promise<void> {
+  try {
+    const email = req.user?.email?.toLowerCase();
+    if (!email) throw new AppError('Acesso restrito a administradores', 403);
+    if (isGlobalAdmin(email) || env.INVITE_ADMINS.includes(email)) { next(); return; }
+
+    const inviteKind = req.headers['x-invite-kind'] === 'COMPANY' ? 'COMPANY' : 'MEMBER';
+    const companyId = typeof req.headers['x-company-id'] === 'string' ? req.headers['x-company-id'] : undefined;
+    if (inviteKind === 'MEMBER' && companyId && req.user?.id) {
+      const { data: membership, error } = await getSupabaseAdmin()
+        .from('company_members')
+        .select('role')
+        .eq('company_id', companyId)
+        .eq('user_id', req.user.id)
+        .eq('status', 'ACTIVE')
+        .in('role', ['COMPANY_ADMIN', 'GLOBAL_ADMIN'])
+        .maybeSingle();
+      if (!error && membership) { next(); return; }
+    }
+    throw new AppError('Acesso restrito a administradores', 403);
+  } catch (error) { next(error); }
 }

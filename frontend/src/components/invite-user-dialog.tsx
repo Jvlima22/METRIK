@@ -40,6 +40,11 @@ export function InviteUserDialog({
 
   useEffect(() => {
     if (!open || isCompanyInvite) return;
+    if (initialCompanyId) {
+      setCompanyId(initialCompanyId);
+      setCompanies([]);
+      return;
+    }
     apiFetch<{ data: Array<{ id: string; name: string; status: string }> }>('/companies')
       .then(({ data }) => {
         const active = data.filter((company) => company.status === 'ACTIVE');
@@ -83,7 +88,7 @@ export function InviteUserDialog({
           </DialogDescription>
         </DialogHeader>
 
-          {!isCompanyInvite && <div className="space-y-1.5"><Label htmlFor="invite-company">Empresa do membro</Label><select id="invite-company" className="h-10 w-full rounded-md border bg-background px-3 text-sm" value={companyId} onChange={(event) => setCompanyId(event.target.value)}><option value="">Selecione uma empresa</option>{companies.map((company) => <option key={company.id} value={company.id}>{company.name}</option>)}</select></div>}
+          {!isCompanyInvite && !initialCompanyId && <div className="space-y-1.5"><Label htmlFor="invite-company">Empresa do membro</Label><select id="invite-company" className="h-10 w-full rounded-md border bg-background px-3 text-sm" value={companyId} onChange={(event) => setCompanyId(event.target.value)}><option value="">Selecione uma empresa</option>{companies.map((company) => <option key={company.id} value={company.id}>{company.name}</option>)}</select></div>}
 
           <div className="space-y-1.5">
           <Label htmlFor="invite-email">{isCompanyInvite ? 'E-mail do responsável pela empresa' : 'E-mail do membro da equipe'}</Label>
