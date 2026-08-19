@@ -135,19 +135,71 @@
   background: #020617;
   color: #f8fafc;
 }
-.company-onboarding-stars,
-.company-onboarding-gradient {
+.company-onboarding-gradient,
+.company-onboarding-stars {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
 }
 .company-onboarding-gradient {
+  z-index: 0;
+  isolation: isolate;
+  overflow: hidden;
+  background: #02050e;
+}
+.company-onboarding-gradient-layer,
+.company-onboarding-gradient-vignette {
+  position: absolute;
+  inset: -18%;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+.company-onboarding-gradient-blue {
+  z-index: 1;
   background:
-    radial-gradient(ellipse 28% 88% at 50% 100%, rgba(6,182,212,.68) 0%, rgba(30,64,175,.42) 28%, transparent 68%),
-    radial-gradient(ellipse 52% 46% at 50% 21%, rgba(37,99,235,.56) 0%, rgba(30,64,175,.24) 44%, transparent 76%),
-    linear-gradient(180deg, #020617 0%, #071b56 48%, #020617 100%);
-  animation: company-onboarding-breathe 16s ease-in-out infinite;
+    radial-gradient(ellipse 38% 76% at 47% 34%, rgba(26,83,255,.95) 0%, rgba(12,43,189,.9) 31%, rgba(4,20,92,.72) 58%, transparent 82%),
+    radial-gradient(ellipse 27% 64% at 16% 57%, rgba(0,53,198,.66) 0%, transparent 74%),
+    radial-gradient(ellipse 22% 57% at 84% 48%, rgba(0,37,168,.64) 0%, transparent 72%),
+    radial-gradient(ellipse 18% 44% at 61% 18%, rgba(45,96,255,.36) 0%, transparent 76%);
+  filter: blur(34px) saturate(118%);
+  animation: company-onboarding-blue-drift 24s ease-in-out infinite alternate;
+}
+.company-onboarding-gradient-cyan {
+  z-index: 2;
+  background:
+    radial-gradient(ellipse 13% 69% at 49% 72%, rgba(83,237,245,.96) 0%, rgba(32,168,230,.84) 28%, rgba(10,94,205,.38) 61%, transparent 84%),
+    radial-gradient(ellipse 9% 43% at 44% 76%, rgba(223,252,255,.8) 0%, rgba(191,247,251,.5) 36%, transparent 78%),
+    radial-gradient(ellipse 20% 52% at 55% 68%, rgba(22,136,246,.34) 0%, transparent 78%);
+  filter: blur(28px) saturate(115%);
+  mix-blend-mode: screen;
+  animation: company-onboarding-cyan-breathe 18s ease-in-out infinite alternate;
+}
+.company-onboarding-gradient-bloom {
+  z-index: 3;
+  background:
+    radial-gradient(ellipse 22% 38% at 48% 98%, rgba(236,243,255,.82) 0%, rgba(178,215,255,.52) 29%, rgba(120,142,255,.2) 54%, transparent 82%),
+    radial-gradient(ellipse 15% 18% at 56% 103%, rgba(222,148,216,.44) 0%, rgba(171,117,239,.15) 45%, transparent 80%);
+  filter: blur(36px);
+  mix-blend-mode: screen;
+  animation: company-onboarding-bloom-drift 21s ease-in-out infinite alternate;
+}
+.company-onboarding-gradient-lilac {
+  z-index: 4;
+  background: radial-gradient(ellipse 15% 18% at 53% 106%, rgba(222,148,216,.5) 0%, rgba(171,117,239,.2) 42%, transparent 80%);
+  filter: blur(32px);
+  mix-blend-mode: screen;
+  animation: company-onboarding-lilac-pulse 17s ease-in-out infinite alternate;
+}
+.company-onboarding-gradient-vignette {
+  z-index: 5;
+  inset: 0;
+  background: radial-gradient(ellipse 72% 88% at 50% 55%, transparent 27%, rgba(0,3,12,.24) 66%, rgba(0,2,9,.82) 100%);
+}
+.company-onboarding-stars {
+  z-index: 1;
+  pointer-events: none;
+  mix-blend-mode: screen;
 }
 .company-onboarding-card {
   position: relative;
@@ -181,7 +233,18 @@
 .company-onboarding-wordmark { position: absolute; width: auto; height: auto; opacity: 0; }
 .company-onboarding-mark { width: min(116px, 30vw); animation: company-onboarding-mark 2.8s cubic-bezier(.2,.8,.2,1) both; filter: drop-shadow(0 0 28px rgba(6,182,212,.34)); }
 .company-onboarding-wordmark { width: min(330px, 72vw); animation: company-onboarding-wordmark 1.1s cubic-bezier(.2,.8,.2,1) 2.8s forwards; filter: drop-shadow(0 0 24px rgba(124,58,237,.26)); }
-@keyframes company-onboarding-breathe { 0%,100% { opacity: .94; transform: scale(1); } 50% { opacity: 1; transform: scale(1.015); } }
+@keyframes company-onboarding-blue-drift { from { transform: translate3d(-2%,1%,0) scale(.98); } to { transform: translate3d(2%,-2%,0) scale(1.04); } }
+@keyframes company-onboarding-cyan-breathe { from { transform: translate3d(0,2%,0) scaleX(.94) scaleY(.98); opacity: .82; } to { transform: translate3d(1%,-1%,0) scaleX(1.06) scaleY(1.03); opacity: 1; } }
+@keyframes company-onboarding-bloom-drift { from { transform: translate3d(-1%,2%,0) scale(.96); opacity: .72; } to { transform: translate3d(2%,-1%,0) scale(1.08); opacity: 1; } }
+@keyframes company-onboarding-lilac-pulse { from { transform: translate3d(-2%,0,0) scale(.95); opacity: .4; } to { transform: translate3d(2%,-1%,0) scale(1.08); opacity: .82; } }
 @keyframes company-onboarding-mark { 0% { opacity: 0; transform: scale(.78) rotate(-4deg); } 13%,62% { opacity: 1; transform: scale(1) rotate(0); } 88%,100% { opacity: 0; transform: scale(.96); } }
 @keyframes company-onboarding-wordmark { 0% { opacity: 0; transform: translateY(10px) scale(.98); filter: blur(6px); } 28%,100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); } }
-@media (max-width: 640px) { .company-onboarding-card { padding: 26px 20px; } }
+@media (max-width: 640px) {
+  .company-onboarding-card { padding: 26px 20px; }
+  .company-onboarding-gradient-blue { filter: blur(25px) saturate(118%); }
+  .company-onboarding-gradient-cyan { filter: blur(21px) saturate(115%); }
+  .company-onboarding-gradient-vignette { background: radial-gradient(ellipse 88% 78% at 50% 57%, transparent 25%, rgba(0,3,12,.28) 62%, rgba(0,2,9,.76) 100%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .company-onboarding-gradient-layer { animation: none; }
+}

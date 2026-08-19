@@ -129,8 +129,14 @@ export function CompanyFirstAccessOnboarding() {
 
   return (
     <div className={`company-onboarding-overlay ${status === 'complete' ? 'company-onboarding-complete' : ''}`} role="dialog" aria-modal="true" aria-label="Configuração inicial da empresa">
+      <div className="company-onboarding-gradient" aria-hidden="true">
+        <div className="company-onboarding-gradient-layer company-onboarding-gradient-blue" />
+        <div className="company-onboarding-gradient-layer company-onboarding-gradient-cyan" />
+        <div className="company-onboarding-gradient-layer company-onboarding-gradient-bloom" />
+        <div className="company-onboarding-gradient-layer company-onboarding-gradient-lilac" />
+        <div className="company-onboarding-gradient-vignette" />
+      </div>
       <canvas ref={canvasRef} className="company-onboarding-stars" aria-hidden="true" />
-      <div className="company-onboarding-gradient" aria-hidden="true" />
       {status === 'complete' ? (
         <div className="company-onboarding-logo-sequence" aria-label="Metrik">
           <img className="company-onboarding-mark" src="/logo-ilustration-white.png" alt="" />
