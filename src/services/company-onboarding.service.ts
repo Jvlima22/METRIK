@@ -27,7 +27,9 @@ export async function getCompanyOnboarding(companyId: string) {
     .maybeSingle();
   if (error) throw new AppError(`Não foi possível carregar o onboarding: ${error.message}`, 500);
   return {
-    eligible: Boolean(data && !data.completed_at),
+    // Empresa nova sem perfil também precisa passar pelo onboarding.
+    // O upsert do salvamento criará o perfil quando o formulário for enviado.
+    eligible: !data || !data.completed_at,
     profile: data ?? null,
   };
 }

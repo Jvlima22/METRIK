@@ -105,7 +105,9 @@ export function CompanyFirstAccessOnboarding() {
     return answers[currentStep.key as Exclude<StepKey, 'adChannels'>];
   }, [answers, currentStep.key]);
 
-  if (isAdmin || (status !== 'loading' && status !== 'ready' && status !== 'complete')) return null;
+  // Administradores não passam pelo onboarding. Para empresas, o overlay só
+  // desaparece após a API confirmar o salvamento; erro não libera o dashboard.
+  if (isAdmin || status === 'idle') return null;
 
   function choose(option: string) {
     if (currentStep.key === 'adChannels') setAnswers((current) => ({ ...current, adChannels: [option] }));
@@ -121,6 +123,7 @@ export function CompanyFirstAccessOnboarding() {
       await apiFetch('/company-onboarding/complete', { method: 'POST', body: JSON.stringify({ ...nextAnswers, answers: nextAnswers, formVersion: 'ads-onboarding-v1' }) });
       window.setTimeout(() => setStatus('idle'), 4300);
     } catch {
+      // O onboarding continua bloqueando o sistema até o envio ser confirmado.
       setStatus('error');
     }
   }
@@ -151,6 +154,13 @@ export function CompanyFirstAccessOnboarding() {
             {currentStep.options.map((option) => <button key={option} type="button" className={currentValue === option ? 'selected' : ''} onClick={() => choose(option)}>{option}</button>)}
           </div>
           <div className="company-onboarding-footer"><button type="button" onClick={goBack} disabled={stepIndex === 0}>Voltar</button><div className="company-onboarding-dots">{steps.map((_, index) => <span key={index} className={index <= stepIndex ? 'active' : ''} />)}</div></div>
+        </div>
+      ) : status === 'error' ? (
+        <div className="company-onboarding-card">
+          <div className="company-onboarding-meta"><span>METRIK INTELLIGENCE</span><span>FORMULÁRIO PENDENTE</span></div>
+          <h1>Conclua sua configuração inicial</h1>
+          <p>Não foi possível salvar suas respostas. O acesso ao dashboard continuará bloqueado até o formulário ser enviado com sucesso.</p>
+          <button type="button" className="company-onboarding-retry" onClick={() => { setStepIndex(0); setStatus('ready'); }}>Tentar novamente</button>
         </div>
       ) : null}
     </div>

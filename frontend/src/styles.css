@@ -224,6 +224,18 @@
 .company-onboarding-footer { margin-top: 24px; color: rgba(226,232,240,.65); font: 500 12px/1 "DM Sans", sans-serif; }
 .company-onboarding-footer button { border: 0; background: none; color: inherit; cursor: pointer; font: inherit; }
 .company-onboarding-footer button:disabled { cursor: default; opacity: .3; }
+.company-onboarding-retry {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid rgba(83,237,245,.58);
+  border-radius: 12px;
+  background: linear-gradient(90deg, rgba(124,58,237,.34), rgba(6,182,212,.26));
+  color: rgba(241,245,249,.96);
+  cursor: pointer;
+  font: 700 14px/1.2 "DM Sans", sans-serif;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.company-onboarding-retry:hover { transform: translateY(-2px); box-shadow: 0 0 24px rgba(83,237,245,.2); }
 .company-onboarding-dots { display: flex; gap: 6px; }
 .company-onboarding-dots span { width: 22px; height: 3px; border-radius: 99px; background: rgba(148,163,184,.24); }
 .company-onboarding-dots span.active { background: linear-gradient(90deg, #7c3aed, #06b6d4); }
