@@ -74,24 +74,43 @@ export function CompanyFirstAccessOnboarding() {
     if (!canvas) return;
     const context = canvas.getContext('2d');
     if (!context) return;
-    const stars = Array.from({ length: 320 }, () => ({ x: Math.random() * 2 - 1, y: Math.random() * 2 - 1, z: Math.random(), size: Math.random() * 1.5 + .35, phase: Math.random() * Math.PI * 2, speed: Math.random() * .02 + .012 }));
+    const stars = Array.from({ length: 560 }, () => ({
+      x: Math.random() * 2 - 1,
+      y: Math.random() * 2 - 1,
+      z: Math.random(),
+      size: Math.random() * 1.35 + .22,
+      phase: Math.random() * Math.PI * 2,
+      speed: Math.random() * .03 + .025,
+      twinkle: Math.random() * .65 + .75,
+    }));
     let frame = 0;
+    let previousTime = 0;
     const resize = () => { canvas.width = window.innerWidth * devicePixelRatio; canvas.height = window.innerHeight * devicePixelRatio; };
     const render = (time: number) => {
       const width = canvas.width / devicePixelRatio; const height = canvas.height / devicePixelRatio;
+      const delta = Math.min(32, previousTime ? time - previousTime : 16);
+      previousTime = time;
       context.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
       context.clearRect(0, 0, width, height);
       const scale = Math.min(width, height) * .62;
       for (const star of stars) {
-        star.z -= star.speed * .55;
+        // Movimento de viagem mais lento e independente da taxa de frames.
+        star.z -= star.speed * delta * .001;
         if (star.z < .015) { star.z = 1; star.x = Math.random() * 2 - 1; star.y = Math.random() * 2 - 1; }
         const perspective = 1 / star.z;
         const x = width / 2 + star.x * scale * perspective;
         const y = height / 2 + star.y * scale * perspective;
-        if (x < -8 || x > width + 8 || y < -8 || y > height + 8) continue;
-        const pulse = .55 + Math.sin(time * .002 * (1 + star.speed * 20) + star.phase) * .24;
-        const radius = Math.max(.35, star.size * (.35 + perspective * .22));
-        context.beginPath(); context.fillStyle = `rgba(255,255,255,${Math.max(.12, Math.min(.92, pulse * (.3 + perspective * .1)))})`; context.arc(x, y, radius, 0, Math.PI * 2); context.fill();
+        if (x < -12 || x > width + 12 || y < -12 || y > height + 12) continue;
+        const pulse = .54 + Math.sin(time * .00135 * star.twinkle + star.phase) * .38;
+        const radius = Math.max(.32, star.size * (.34 + perspective * .2));
+        const alpha = Math.max(.08, Math.min(.96, pulse * (.34 + perspective * .12)));
+        if (radius > .9) {
+          const glow = context.createRadialGradient(x, y, 0, x, y, radius * 3.8);
+          glow.addColorStop(0, `rgba(255,255,255,${alpha * .42})`);
+          glow.addColorStop(1, 'rgba(255,255,255,0)');
+          context.beginPath(); context.fillStyle = glow; context.arc(x, y, radius * 3.8, 0, Math.PI * 2); context.fill();
+        }
+        context.beginPath(); context.fillStyle = `rgba(255,255,255,${alpha})`; context.arc(x, y, radius, 0, Math.PI * 2); context.fill();
       }
       frame = requestAnimationFrame(render);
     };
