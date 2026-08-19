@@ -70,7 +70,9 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         : saved.filter((account) => Boolean(account.companyId));
       setAllAccounts(nextAccounts);
       setActiveId(localStorage.getItem(activeKey) ?? EMPTY_ACCOUNT.id);
-      setActiveCompanyIdState(localStorage.getItem(companyKey));
+      const storedCompanyId = localStorage.getItem(companyKey);
+      const inferredCompanyId = nextAccounts.find((account) => account.companyId)?.companyId ?? null;
+      setActiveCompanyIdState(storedCompanyId ?? inferredCompanyId);
     } catch {
       setAllAccounts(isAdmin ? initialAccounts : []);
       setActiveId(EMPTY_ACCOUNT.id);

@@ -8,6 +8,7 @@ import adsDraftRoutes from "./ads-drafts.routes";
 import integrationHubRoutes from "./integration-hub.routes";
 import companiesRoutes from './companies.routes';
 import companySignupRoutes from './company-signup.routes';
+import companyOnboardingRoutes from './company-onboarding.routes';
 
 const router = Router();
 router.use("/webhook", webhookRoutes);
@@ -19,4 +20,5 @@ router.use("/ai", adsDraftRoutes);
 router.use("/integrations", integrationHubRoutes);
 router.use('/companies', companiesRoutes);
 router.use('/company-signup', companySignupRoutes);
+router.use('/company-onboarding', companyOnboardingRoutes);
 export default router;

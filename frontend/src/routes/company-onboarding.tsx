@@ -112,7 +112,7 @@ function CompanyOnboardingPage() {
     setSubmitting(true);
     setError(null);
     try {
-      await apiFetch<{ data: { companyId: string } }>('/company-signup/complete', {
+      const { data: signupData } = await apiFetch<{ data: { companyId: string } }>('/company-signup/complete', {
         method: 'POST',
         body: JSON.stringify({
           token,
@@ -129,6 +129,10 @@ function CompanyOnboardingPage() {
         ? await supabase.auth.signInWithPassword({ email: invite.email, password: form.password })
         : { error: null };
       if (signInError) throw signInError;
+      const { data: currentSession } = supabase ? await supabase.auth.getSession() : { data: { session: null } };
+      try {
+        localStorage.setItem(`metrik:${currentSession.session?.user?.id ?? invite.email}:active-company`, signupData.companyId);
+      } catch { /* armazenamento local é opcional */ }
 
       toast.success('Conta criada com sucesso');
       navigate({ to: '/dashboard' });

@@ -4,6 +4,7 @@ import { env } from '../config/env';
 import { AppError } from '../utils/AppError';
 import type { CompanyRole } from '../types/express';
 import { validateCnpj } from './cnpj-validation.service';
+import { seedPendingCompanyOnboarding } from './company-onboarding.service';
 
 const INVITE_TTL_HOURS = 72;
 
@@ -98,5 +99,6 @@ export async function completeCompanySignup(input: { token: string; password: st
   const { error: memberError } = await supabase.from('company_members').insert({ company_id: company.id, user_id: authUser.id, role: 'COMPANY_ADMIN' as CompanyRole, status: 'ACTIVE' });
   if (memberError) throw new AppError(`Empresa criada, mas não foi possível criar o administrador: ${memberError.message}`, 500);
   await supabase.from('company_signup_invitations').update({ status: 'ACCEPTED', accepted_by: authUser.id, accepted_at: new Date().toISOString(), company_id: company.id }).eq('id', invite.id);
+  await seedPendingCompanyOnboarding(company.id);
   return { completed: true, companyId: company.id, email: invite.email, company };
 }

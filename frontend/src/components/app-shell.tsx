@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { ActivityFeedPanel } from "@/components/activity-feed-panel";
 import { AccountSwitcher } from "@/components/account-switcher";
 import { useAccount } from "@/lib/account-context";
+import { CompanyFirstAccessOnboarding } from "@/components/company-first-access-onboarding";
 import { MobileAccountSwitcher } from "@/components/mobile-account-switcher";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import {
@@ -323,6 +324,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
 
         <main className="flex-1 p-4 md:p-8 max-w-[1500px] mx-auto w-full">{children}</main>
+        <CompanyFirstAccessOnboarding />
       </div>
       <ActivityFeedPanel open={feedOpen} onClose={() => setFeedOpen(false)} />
       {isAdmin && <InviteUserDialog open={inviteOpen} onOpenChange={setInviteOpen} mode={inviteMode} />}

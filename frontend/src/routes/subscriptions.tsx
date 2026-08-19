@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { usePlan } from "@/lib/plan-context";
+import type { PlanId } from "@/lib/entitlements";
 
 export const Route = createFileRoute("/subscriptions")({ component: SubscriptionsPage });
 

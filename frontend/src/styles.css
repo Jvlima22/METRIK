@@ -123,3 +123,65 @@
     box-shadow: 0 12px 30px -26px rgba(15, 18, 40, 0.3);
   }
 }
+
+/* Company first-access onboarding */
+.company-onboarding-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #020617;
+  color: #f8fafc;
+}
+.company-onboarding-stars,
+.company-onboarding-gradient {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.company-onboarding-gradient {
+  background:
+    radial-gradient(ellipse 28% 88% at 50% 100%, rgba(6,182,212,.68) 0%, rgba(30,64,175,.42) 28%, transparent 68%),
+    radial-gradient(ellipse 52% 46% at 50% 21%, rgba(37,99,235,.56) 0%, rgba(30,64,175,.24) 44%, transparent 76%),
+    linear-gradient(180deg, #020617 0%, #071b56 48%, #020617 100%);
+  animation: company-onboarding-breathe 16s ease-in-out infinite;
+}
+.company-onboarding-card {
+  position: relative;
+  z-index: 2;
+  width: min(560px, calc(100vw - 32px));
+  padding: 34px;
+  border: 1px solid rgba(148,163,184,.2);
+  border-radius: 22px;
+  background: rgba(8,15,40,.74);
+  box-shadow: 0 28px 90px rgba(0,0,0,.35), inset 0 1px rgba(255,255,255,.06);
+  backdrop-filter: blur(20px);
+}
+.company-onboarding-meta,
+.company-onboarding-footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.company-onboarding-meta { color: rgba(125,211,252,.82); font: 700 10px/1 "Space Grotesk", sans-serif; letter-spacing: .16em; }
+.company-onboarding-card h1 { margin: 28px 0 10px; font: 700 clamp(30px, 5vw, 48px)/1.04 "Space Grotesk", sans-serif; letter-spacing: -.04em; }
+.company-onboarding-card > p { margin: 0 0 24px; color: rgba(226,232,240,.7); font: 400 14px/1.5 "DM Sans", sans-serif; }
+.company-onboarding-options { display: grid; gap: 9px; }
+.company-onboarding-options button { width: 100%; padding: 14px 16px; border: 1px solid rgba(148,163,184,.18); border-radius: 12px; background: rgba(15,23,42,.52); color: rgba(241,245,249,.9); cursor: pointer; text-align: left; font: 600 14px/1.2 "DM Sans", sans-serif; transition: .18s ease; }
+.company-onboarding-options button:hover,
+.company-onboarding-options button.selected { border-color: rgba(6,182,212,.72); background: linear-gradient(90deg, rgba(124,58,237,.3), rgba(6,182,212,.22)); box-shadow: 0 0 22px rgba(6,182,212,.12); transform: translateX(3px); }
+.company-onboarding-footer { margin-top: 24px; color: rgba(226,232,240,.65); font: 500 12px/1 "DM Sans", sans-serif; }
+.company-onboarding-footer button { border: 0; background: none; color: inherit; cursor: pointer; font: inherit; }
+.company-onboarding-footer button:disabled { cursor: default; opacity: .3; }
+.company-onboarding-dots { display: flex; gap: 6px; }
+.company-onboarding-dots span { width: 22px; height: 3px; border-radius: 99px; background: rgba(148,163,184,.24); }
+.company-onboarding-dots span.active { background: linear-gradient(90deg, #7c3aed, #06b6d4); }
+.company-onboarding-complete { background: #020617; }
+.company-onboarding-logo-sequence { position: relative; z-index: 2; display: grid; place-items: center; width: 100%; height: 100%; }
+.company-onboarding-mark,
+.company-onboarding-wordmark { position: absolute; width: auto; height: auto; opacity: 0; }
+.company-onboarding-mark { width: min(116px, 30vw); animation: company-onboarding-mark 2.8s cubic-bezier(.2,.8,.2,1) both; filter: drop-shadow(0 0 28px rgba(6,182,212,.34)); }
+.company-onboarding-wordmark { width: min(330px, 72vw); animation: company-onboarding-wordmark 1.1s cubic-bezier(.2,.8,.2,1) 2.8s forwards; filter: drop-shadow(0 0 24px rgba(124,58,237,.26)); }
+@keyframes company-onboarding-breathe { 0%,100% { opacity: .94; transform: scale(1); } 50% { opacity: 1; transform: scale(1.015); } }
+@keyframes company-onboarding-mark { 0% { opacity: 0; transform: scale(.78) rotate(-4deg); } 13%,62% { opacity: 1; transform: scale(1) rotate(0); } 88%,100% { opacity: 0; transform: scale(.96); } }
+@keyframes company-onboarding-wordmark { 0% { opacity: 0; transform: translateY(10px) scale(.98); filter: blur(6px); } 28%,100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); } }
+@media (max-width: 640px) { .company-onboarding-card { padding: 26px 20px; } }
