@@ -14,6 +14,7 @@ import {
   Loader2,
   LogOut,
   UserPlus,
+  Settings2,
   type LucideIcon,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
@@ -63,6 +64,7 @@ const navSections: { group: string; items: NavItem[] }[] = [
       { to: "/creatives", label: "Criativos", icon: Images },
       { to: "/ai-ads", label: "Inteligencia de Ads", icon: Activity },
       { to: "/subscriptions", label: "Assinaturas", icon: CreditCard },
+      { to: "/company-settings", label: "Configuração da empresa", icon: Settings2 },
     ],
   },
 ];

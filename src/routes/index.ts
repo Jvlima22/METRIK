@@ -9,6 +9,7 @@ import realAdsRoutes from './real-ads.routes';
 import companiesRoutes from './companies.routes';
 import companySignupRoutes from './company-signup.routes';
 import companyOnboardingRoutes from './company-onboarding.routes';
+import companyProfileRoutes from './company-profile.routes';
 
 // As rotas de webhook/jobs carregam BullMQ e Redis no escopo do módulo.
 // Na Vercel, o backend HTTP não deve inicializar uma conexão Redis local
@@ -38,4 +39,5 @@ router.use('/integrations/ads', realAdsRoutes);
 router.use('/companies', companiesRoutes);
 router.use('/company-signup', companySignupRoutes);
 router.use('/company-onboarding', companyOnboardingRoutes);
+router.use('/company-profile', companyProfileRoutes);
 export default router;
