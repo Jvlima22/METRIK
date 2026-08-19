@@ -1,5 +1,5 @@
 export type IntegrationCategory = "AI" | "CRM" | "ADS" | "COMMUNICATION" | "CUSTOM";
-export type IntegrationStatus = "EMPTY" | "DRAFT" | "CONNECTED" | "ERROR";
+export type IntegrationStatus = "EMPTY" | "DRAFT" | "CONNECTED" | "ERROR" | "PAUSED";
 export type IntegrationDirection = "INBOUND" | "OUTBOUND" | "BIDIRECTIONAL";
 
 export type IntegrationDefinition = {
