@@ -63,6 +63,11 @@ const navSections: { group: string; items: NavItem[] }[] = [
       { to: "/manage", label: "Campanhas", icon: Megaphone },
       { to: "/creatives", label: "Criativos", icon: Images },
       { to: "/ai-ads", label: "Inteligencia de Ads", icon: Activity },
+    ],
+  },
+  {
+    group: "Conta",
+    items: [
       { to: "/subscriptions", label: "Assinaturas", icon: CreditCard },
       { to: "/company-settings", label: "Configuração", icon: Settings2 },
     ],
