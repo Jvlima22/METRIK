@@ -74,7 +74,7 @@ export function CompanyFirstAccessOnboarding() {
     if (!canvas) return;
     const context = canvas.getContext('2d');
     if (!context) return;
-    const stars = Array.from({ length: 560 }, () => ({
+    const stars = Array.from({ length: 760 }, () => ({
       x: Math.random() * 2 - 1,
       y: Math.random() * 2 - 1,
       z: Math.random(),
