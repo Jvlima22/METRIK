@@ -37,24 +37,25 @@ const emptyAnswers: Answers = { primaryGoal: '', adChannels: [], conversionEvent
 
 export function CompanyFirstAccessOnboarding() {
   const { isAdmin } = useAuth();
-  const { activeCompanyId } = useAccount();
+  const { activeCompanyId, setActiveCompanyId } = useAccount();
   const [status, setStatus] = useState<'idle' | 'loading' | 'ready' | 'complete' | 'error'>('idle');
   const [stepIndex, setStepIndex] = useState(0);
   const [answers, setAnswers] = useState<Answers>(emptyAnswers);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
-    if (isAdmin || !activeCompanyId) {
+    if (isAdmin) {
       setStatus('idle');
       return;
     }
     let cancelled = false;
     setStatus('loading');
-    apiFetch<{ data: { eligible: boolean; profile: { answers?: Answers; primary_goal?: string; ad_channels?: string[]; conversion_event?: string; management_model?: string } | null } }>('/company-onboarding/status')
+    apiFetch<{ data: { eligible: boolean; profile: { company_id?: string; answers?: Answers; primary_goal?: string; ad_channels?: string[]; conversion_event?: string; management_model?: string } | null } }>('/company-onboarding/status')
       .then(({ data }) => {
         if (cancelled) return;
         if (!data.eligible) { setStatus('idle'); return; }
         const profile = data.profile;
+        if (profile?.company_id && profile.company_id !== activeCompanyId) setActiveCompanyId(profile.company_id);
         setAnswers({
           primaryGoal: profile?.primary_goal ?? profile?.answers?.primaryGoal ?? '',
           adChannels: profile?.ad_channels ?? profile?.answers?.adChannels ?? [],
@@ -65,7 +66,7 @@ export function CompanyFirstAccessOnboarding() {
       })
       .catch(() => { if (!cancelled) setStatus('error'); });
     return () => { cancelled = true; };
-  }, [activeCompanyId, isAdmin]);
+  }, [activeCompanyId, isAdmin, setActiveCompanyId]);
 
   useEffect(() => {
     if (status !== 'ready' && status !== 'complete') return;
@@ -104,7 +105,7 @@ export function CompanyFirstAccessOnboarding() {
     return answers[currentStep.key as Exclude<StepKey, 'adChannels'>];
   }, [answers, currentStep.key]);
 
-  if (isAdmin || !activeCompanyId || (status !== 'ready' && status !== 'complete')) return null;
+  if (isAdmin || (status !== 'ready' && status !== 'complete')) return null;
 
   function choose(option: string) {
     if (currentStep.key === 'adChannels') setAnswers((current) => ({ ...current, adChannels: [option] }));
