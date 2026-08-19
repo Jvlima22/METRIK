@@ -32,17 +32,39 @@ function isValidCnpj(value: string) {
   return calculate(cnpj.slice(0, 12)) === Number(cnpj[12]) && calculate(cnpj.slice(0, 13)) === Number(cnpj[13]);
 }
 
+async function purgeOrphanedAuthUser(userId: string) {
+  const supabase = getSupabaseAdmin();
+  const checks = await Promise.all([
+    supabase.from('company_members').select('id').eq('user_id', userId).limit(1),
+    supabase.from('companies').select('id').eq('created_by', userId).limit(1),
+    supabase.from('company_invitations').select('id').eq('invited_by', userId).limit(1),
+    supabase.from('company_signup_invitations').select('id').eq('accepted_by', userId).not('company_id', 'is', null).limit(1),
+    supabase.from('integration_connections').select('id').eq('owner_user_id', userId).limit(1),
+    supabase.from('integration_sync_jobs').select('id').eq('owner_user_id', userId).limit(1),
+    supabase.from('integration_audit_logs').select('id').eq('owner_user_id', userId).limit(1),
+  ]);
+  const queryError = checks.find((result) => result.error)?.error;
+  if (queryError) throw new AppError(`Não foi possível verificar a conta órfã: ${queryError.message}`, 500);
+  if (checks.some((result) => (result.data ?? []).length > 0)) return false;
+
+  const { error } = await supabase.auth.admin.deleteUser(userId);
+  if (error) throw new AppError(`Este e-mail já possui uma conta no Metrik e não pôde ser reutilizado: ${error.message}`, 409);
+  return true;
+}
+
 export async function createCompanySignupInvite(input: { email: string; provisionalName?: string; invitedBy: string }) {
   const email = input.email.trim().toLowerCase();
   if (!email.includes('@')) throw new AppError('E-mail de convite inválido', 400);
   const token = randomBytes(32).toString('hex');
   const supabase = getSupabaseAdmin();
   const { data: users } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 });
-  const existingUser = users?.users.find((user) => user.email?.toLowerCase() === email);
+  let existingUser = users?.users.find((user) => user.email?.toLowerCase() === email);
   if (existingUser) {
     const { data: memberships } = await supabase.from('company_members').select('company_id').eq('user_id', existingUser.id).eq('status', 'ACTIVE').limit(1);
     if (memberships?.length) throw new AppError('Este e-mail já está vinculado a uma empresa no Metrik.', 409);
-    throw new AppError('Este e-mail já possui uma conta no Metrik. Use o convite de membro ou entre com a conta existente.', 409);
+    const purged = await purgeOrphanedAuthUser(existingUser.id);
+    if (!purged) throw new AppError('Este e-mail já possui uma conta no Metrik. Use o convite de membro ou entre com a conta existente.', 409);
+    existingUser = undefined;
   }
   await supabase.from('company_signup_invitations').update({ status: 'REVOKED', revoked_at: new Date().toISOString() }).eq('email', email).in('status', ['PENDING', 'OPENED']);
   const { data: invite, error } = await supabase.from('company_signup_invitations').insert({ email, provisional_name: input.provisionalName?.trim() || null, token_hash: hashToken(token), invited_by: input.invitedBy, status: 'PENDING', expires_at: new Date(Date.now() + INVITE_TTL_HOURS * 60 * 60 * 1000).toISOString() }).select('id,email,provisional_name,status,expires_at,created_at').single();
