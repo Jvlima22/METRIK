@@ -5,6 +5,7 @@ import { AppError } from '../utils/AppError';
 import type { CompanyRole } from '../types/express';
 import { validateCnpj } from './cnpj-validation.service';
 import { seedPendingCompanyOnboarding } from './company-onboarding.service';
+import { describeError, describeErrorCode } from '../utils/error-message';
 
 const INVITE_TTL_HOURS = 72;
 
@@ -73,11 +74,14 @@ export async function createCompanySignupInvite(input: { email: string; provisio
   const { error: authError } = await supabase.auth.admin.inviteUserByEmail(email, { redirectTo, data: { company_invitation_id: invite.id, company_signup_token: token } });
   if (authError) {
     await supabase.from('company_signup_invitations').update({ status: 'REVOKED', revoked_at: new Date().toISOString() }).eq('id', invite.id);
-    const message = authError.message.toLowerCase();
+    const errorMessage = describeError(authError);
+    const errorCode = describeErrorCode(authError);
+    console.error('[auth/invite] Supabase rejeitou convite de empresa', { code: errorCode, message: errorMessage });
+    const message = errorMessage.toLowerCase();
     if (message.includes('rate limit') || message.includes('rate_limit') || message.includes('too many')) {
       throw new AppError('O Supabase atingiu o limite temporário de envio de e-mails. Aguarde e tente novamente mais tarde; nenhum convite foi mantido.', 429);
     }
-    throw new AppError(`O convite não foi enviado pelo Supabase: ${authError.message}`, 502);
+    throw new AppError(`O convite não foi enviado pelo Supabase${errorCode ? ` (${errorCode})` : ''}: ${errorMessage}`, 502);
   }
   return { ...invite, inviteUrl: redirectTo };
 }
