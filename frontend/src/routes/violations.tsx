@@ -56,7 +56,7 @@ function ViolationsPage() {
   // Violações isoladas por conta — derivadas dos criativos da própria conta.
   const { activeAccount, activeCompanyId } = useAccount();
   const { isAdmin } = useAuth();
-  const showAdminDemo = isAdmin && !activeCompanyId && activeAccount.id !== EMPTY_ACCOUNT.id;
+  const showAdminDemo = isAdmin && !activeCompanyId && activeAccount.id !== EMPTY_ACCOUNT.id && Boolean(activeAccount.brandKey);
   const scoped = useMemo(
     () => showAdminDemo ? violationsForAccount(activeAccount) : [],
     [activeAccount, showAdminDemo],

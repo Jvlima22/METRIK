@@ -183,7 +183,7 @@ function DashboardPage() {
   // numbers (pure mock — no real API call).
   const { activeAccount, activeCompanyId } = useAccount();
   const { isAdmin } = useAuth();
-  const showAdminDemo = isAdmin && !activeCompanyId && activeAccount.id !== EMPTY_ACCOUNT.id;
+  const showAdminDemo = isAdmin && !activeCompanyId && activeAccount.id !== EMPTY_ACCOUNT.id && Boolean(activeAccount.brandKey);
   const performanceCardRef = useRef<HTMLDivElement>(null);
   const [exportingPerformance, setExportingPerformance] = useState(false);
   const accountPlatform = PLATFORM_DATA_KEY[activeAccount.platform];

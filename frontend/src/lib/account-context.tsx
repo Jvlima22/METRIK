@@ -57,7 +57,16 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       const parsed = storedList ? JSON.parse(storedList) as AdAccount[] : [];
       const saved = Array.isArray(parsed) ? parsed : [];
       const nextAccounts = isAdmin
-        ? [...saved, ...initialAccounts.filter((seed) => !saved.some((account) => account.id === seed.id))]
+        ? [
+            // As contas demo pertencem exclusivamente ao Global Admin. O seed
+            // também restaura o `brandKey` caso uma versão antiga tenha sido
+            // persistida no navegador sem essa marcação.
+            ...initialAccounts.map((seed) => {
+              const savedAccount = saved.find((account) => account.id === seed.id);
+              return savedAccount ? { ...seed, ...savedAccount, brandKey: seed.brandKey } : seed;
+            }),
+            ...saved.filter((account) => !initialAccounts.some((seed) => seed.id === account.id)),
+          ]
         : saved.filter((account) => Boolean(account.companyId));
       setAllAccounts(nextAccounts);
       setActiveId(localStorage.getItem(activeKey) ?? EMPTY_ACCOUNT.id);
