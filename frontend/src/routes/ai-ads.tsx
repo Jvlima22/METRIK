@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { integrationCatalog, type HubConnection, type IntegrationDefinition, type IntegrationDirection } from "@/lib/hub-integrations";
 import { apiFetch } from "@/lib/api";
+import { useAccount } from "@/lib/account-context";
 
 export const Route = createFileRoute("/ai-ads")({ component: AiAdsPage });
 
@@ -36,8 +37,22 @@ function AdsOverview() {
 }
 
 function HubTab() {
-  const [connections, setConnections] = useState<HubConnection[]>(Array.from({ length: 8 }, (_, slot) => ({ slot, status: "EMPTY", scopes: [] })));
-  const [backendIds, setBackendIds] = useState<Record<number, string>>({});
+  const { activeCompanyId } = useAccount();
+  const emptyConnections = () => Array.from({ length: 8 }, (_, slot) => ({ slot, status: "EMPTY" as const, scopes: [] }));
+  const hubStorageKey = activeCompanyId ? `metrik:hub-connections:${activeCompanyId}` : null;
+  const readHubCache = () => {
+    if (!hubStorageKey || typeof window === "undefined") return null;
+    try {
+      const raw = window.localStorage.getItem(hubStorageKey);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw) as { connections?: HubConnection[]; backendIds?: Record<number, string> };
+      return { connections: Array.isArray(parsed.connections) ? parsed.connections : emptyConnections(), backendIds: parsed.backendIds ?? {} };
+    } catch { return null; }
+  };
+  const cachedHub = readHubCache();
+  const [connections, setConnections] = useState<HubConnection[]>(cachedHub?.connections ?? emptyConnections());
+  const [backendIds, setBackendIds] = useState<Record<number, string>>(cachedHub?.backendIds ?? {});
+  const [connectionsReady, setConnectionsReady] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [oauthLoading, setOauthLoading] = useState(false);
   const [activeSlot, setActiveSlot] = useState<number | null>(null);
@@ -48,13 +63,22 @@ function HubTab() {
   const [managementError, setManagementError] = useState<string | null>(null);
   const [managementMenuOpen, setManagementMenuOpen] = useState(false);
   useEffect(() => {
+    if (!activeCompanyId) return;
+    const cached = readHubCache();
+    if (cached) { setConnections(cached.connections); setBackendIds(cached.backendIds); }
+    setConnectionsReady(false);
     apiFetch<{ data: Array<{ id: string; provider: string; status: HubConnection["status"]; scopes?: string[]; workspace_name?: string; metadata?: { direction?: IntegrationDirection }; updated_at?: string }> }>("/integrations/connections")
       .then(({ data }) => {
         setConnections((current) => current.map((slot, index) => { const item = data[index]; return item ? { ...slot, providerId: item.provider, status: item.status, scopes: item.scopes ?? [], workspace: item.workspace_name ?? undefined, direction: item.metadata?.direction, updatedAt: item.updated_at } : slot; }));
         setBackendIds(Object.fromEntries(data.slice(0, 8).map((item, index) => [index, item.id])));
       })
-      .catch(() => undefined);
-  }, []);
+      .catch(() => undefined)
+      .finally(() => setConnectionsReady(true));
+  }, [activeCompanyId]);
+  useEffect(() => {
+    if (!activeCompanyId || !connectionsReady || typeof window === "undefined") return;
+    try { window.localStorage.setItem(`metrik:hub-connections:${activeCompanyId}`, JSON.stringify({ connections, backendIds })); } catch { /* cache opcional */ }
+  }, [activeCompanyId, connections, backendIds, connectionsReady]);
   const [selectedProvider, setSelectedProvider] = useState<IntegrationDefinition | null>(null);
   const [direction, setDirection] = useState<IntegrationDirection>("BIDIRECTIONAL");
   const [workspace, setWorkspace] = useState("");
