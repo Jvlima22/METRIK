@@ -24,10 +24,12 @@ export function InviteUserDialog({
   open,
   onOpenChange,
   mode = 'MEMBER',
+  initialCompanyId,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   mode?: 'COMPANY' | 'MEMBER';
+  initialCompanyId?: string | null;
 }) {
   const { inviteUser } = useAuth();
   const isCompanyInvite = mode === 'COMPANY';
@@ -43,10 +45,11 @@ export function InviteUserDialog({
         const active = data.filter((company) => company.status === 'ACTIVE');
         setCompanies(active);
         const stored = typeof window !== 'undefined' ? window.localStorage.getItem('metrik:active-company-id') : null;
-        setCompanyId(stored && active.some((company) => company.id === stored) ? stored : active[0]?.id ?? '');
+        const preferred = initialCompanyId && active.some((company) => company.id === initialCompanyId) ? initialCompanyId : stored;
+        setCompanyId(preferred && active.some((company) => company.id === preferred) ? preferred : active[0]?.id ?? '');
       })
       .catch(() => { setCompanies([]); setCompanyId(''); });
-  }, [open, isCompanyInvite]);
+  }, [initialCompanyId, open, isCompanyInvite]);
 
   async function handleInvite() {
     const trimmed = email.trim();

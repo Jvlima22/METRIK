@@ -16,9 +16,10 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { MousePointerClick, DollarSign, Target, Zap, TrendingUp, Heart, MessageCircle, ShieldCheck, Sparkles, ArrowRight, Pause, Download } from "lucide-react";
+import { MousePointerClick, DollarSign, Target, Zap, TrendingUp, Heart, MessageCircle, ShieldCheck, Sparkles, ArrowRight, Pause, Download, UserPlus } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/app-shell";
+import { InviteUserDialog } from "@/components/invite-user-dialog";
 import { GlassCard } from "@/components/glass-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -177,6 +178,7 @@ function DashboardPage() {
   const [from, setFrom] = useState(isoDaysAgo(13));
   const [to, setTo] = useState(isoDaysAgo(0));
   const [selected, setSelected] = useState<CampaignMetrics | null>(null);
+  const [inviteMemberOpen, setInviteMemberOpen] = useState(false);
 
   // Scope the dashboard to the active account: keep only its platform and
   // apply a deterministic per-account scale so switching accounts changes the
@@ -286,7 +288,14 @@ function DashboardPage() {
             <p className="text-xs text-muted-foreground font-medium">Centro de Inteligência</p>
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold mt-1">Anúncios</h1>
           </div>
-          <div className="flex items-center gap-2 text-xs">
+          <div className="flex flex-wrap items-center justify-end gap-2 text-xs">
+            {isAdmin && activeCompanyId && (
+              <Button type="button" size="sm" className="h-9 gap-1.5 bg-foreground text-background shadow-sm hover:bg-foreground/90" onClick={() => setInviteMemberOpen(true)}>
+                <UserPlus className="size-3.5" />
+                <span className="hidden sm:inline">Convidar membro</span>
+                <span className="sm:hidden">Convidar</span>
+              </Button>
+            )}
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent/70 border border-border text-foreground/70 font-medium">
               <span
                 className="size-3.5 rounded flex items-center justify-center text-white text-[9px] font-bold"
@@ -584,6 +593,12 @@ function DashboardPage() {
         </GlassCard>
       </motion.div>
 
+      <InviteUserDialog
+        open={inviteMemberOpen}
+        onOpenChange={setInviteMemberOpen}
+        mode="MEMBER"
+        initialCompanyId={activeCompanyId}
+      />
       <AdCreativePanel campaign={selected} onClose={() => setSelected(null)} />
     </AppShell>
   );
