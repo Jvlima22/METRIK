@@ -34,6 +34,7 @@ export function AccountSwitcher({ collapsed }: { collapsed: boolean }) {
   const [addOpen, setAddOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
   const selectedCompany = companies.find((company) => company.id === activeCompanyId);
+  const activeAccountCompany = companies.find((company) => company.id === activeAccount.companyId) ?? selectedCompany;
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -60,7 +61,7 @@ export function AccountSwitcher({ collapsed }: { collapsed: boolean }) {
             )}
             aria-label="Trocar de conta"
           >
-            {selectedCompany?.logo_url ? <img src={selectedCompany.logo_url} alt={`Logo da ${selectedCompany.name}`} className="size-8 rounded-lg object-contain" /> : <PlatformBadge platform={activeAccount.platform} className="size-8 text-xs" />}
+            {activeAccountCompany?.logo_url ? <img src={activeAccountCompany.logo_url} alt={`Logo da ${activeAccountCompany.name}`} className="size-8 rounded-lg object-contain" /> : <PlatformBadge platform={activeAccount.platform} className="size-8 text-xs" />}
             {!collapsed && (
               <>
                 <div className="min-w-0 flex-1">
@@ -104,21 +105,22 @@ export function AccountSwitcher({ collapsed }: { collapsed: boolean }) {
                 <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
                   {platformMeta[p].label}
                 </DropdownMenuLabel>
-                {group.map((acc) => (
-                  <DropdownMenuItem
+                {group.map((acc) => {
+                  const accountCompany = companies.find((company) => company.id === acc.companyId);
+                  return <DropdownMenuItem
                     key={acc.id}
                     onSelect={() => setActiveAccount(acc.id)}
                     className="gap-2.5"
                   >
-                    <PlatformBadge platform={acc.platform} className="size-7 text-[11px]" />
+                    {accountCompany?.logo_url ? <img src={accountCompany.logo_url} alt={`Logo da ${accountCompany.name}`} className="size-7 shrink-0 rounded-md object-contain" /> : <PlatformBadge platform={acc.platform} className="size-7 text-[11px]" />}
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-medium truncate">{acc.name}</p>
                       <p className="text-[10px] text-muted-foreground truncate">{acc.accountId}</p>
                     </div>
                     <span className={cn("size-1.5 rounded-full shrink-0", statusMeta[acc.status].dot)} />
                     {acc.id === activeAccount.id && <Check className="size-3.5 text-violet shrink-0" />}
-                  </DropdownMenuItem>
-                ))}
+                  </DropdownMenuItem>;
+                })}
               </DropdownMenuGroup>
             );
           })}
