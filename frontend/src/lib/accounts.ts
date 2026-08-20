@@ -33,6 +33,8 @@ export type AdAccount = {
   companyName?: string;
   /** Empresa por trás da conta — escolhe o conjunto de dados mock brandeado. */
   brandKey?: BrandKey;
+  /** Logo opcional para contas mock exibidas no seletor. */
+  logoUrl?: string;
 };
 
 export const platformMeta: Record<
@@ -72,8 +74,8 @@ export const initialAccounts: AdAccount[] = [
   { id: "acc-m-001", platform: "META_ADS", name: "Aura Cosmetics", accountId: "act_1029384756", status: "active", currency: "BRL", brandKey: "aura" },
 
   // Vintech — SaaS wine-tech (gestão/vendas para vinícolas e importadoras).
-  { id: "acc-g-vintech", platform: "GOOGLE_ADS", name: "Vintech", accountId: "738-204-9961", status: "active", currency: "BRL", brandKey: "vintech", claudeProjectId: "514627cc-a1e1-4f38-8249-06abe1dd9667" },
-  { id: "acc-m-vintech", platform: "META_ADS", name: "Vintech", accountId: "act_7790231845", status: "active", currency: "BRL", brandKey: "vintech", claudeProjectId: "514627cc-a1e1-4f38-8249-06abe1dd9667" },
+  { id: "acc-g-vintech", platform: "GOOGLE_ADS", name: "Vintech", accountId: "738-204-9961", status: "active", currency: "BRL", brandKey: "vintech", logoUrl: "/vintech-logo.png", claudeProjectId: "514627cc-a1e1-4f38-8249-06abe1dd9667" },
+  { id: "acc-m-vintech", platform: "META_ADS", name: "Vintech", accountId: "act_7790231845", status: "active", currency: "BRL", brandKey: "vintech", logoUrl: "/vintech-logo.png", claudeProjectId: "514627cc-a1e1-4f38-8249-06abe1dd9667" },
 
   // TGL Solutions — automação + IA sob medida para empresas.
   { id: "acc-g-tgl", platform: "GOOGLE_ADS", name: "TGL Solutions", accountId: "905-417-2230", status: "active", currency: "BRL", brandKey: "tgl" },

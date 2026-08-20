@@ -35,6 +35,7 @@ export function AccountSwitcher({ collapsed }: { collapsed: boolean }) {
   const [manageOpen, setManageOpen] = useState(false);
   const selectedCompany = companies.find((company) => company.id === activeCompanyId);
   const activeAccountCompany = companies.find((company) => company.id === activeAccount.companyId) ?? selectedCompany;
+  const activeAccountLogo = activeAccount.logoUrl ?? activeAccountCompany?.logo_url;
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -61,7 +62,7 @@ export function AccountSwitcher({ collapsed }: { collapsed: boolean }) {
             )}
             aria-label="Trocar de conta"
           >
-            {activeAccountCompany?.logo_url ? <img src={activeAccountCompany.logo_url} alt={`Logo da ${activeAccountCompany.name}`} className="size-8 rounded-lg object-contain" /> : <PlatformBadge platform={activeAccount.platform} className="size-8 text-xs" />}
+            {activeAccountLogo ? <img src={activeAccountLogo} alt={`Logo da ${activeAccount.name}`} className="size-8 rounded-lg object-contain" /> : <PlatformBadge platform={activeAccount.platform} className="size-8 text-xs" />}
             {!collapsed && (
               <>
                 <div className="min-w-0 flex-1">
@@ -112,7 +113,7 @@ export function AccountSwitcher({ collapsed }: { collapsed: boolean }) {
                     onSelect={() => setActiveAccount(acc.id)}
                     className="gap-2.5"
                   >
-                    {accountCompany?.logo_url ? <img src={accountCompany.logo_url} alt={`Logo da ${accountCompany.name}`} className="size-7 shrink-0 rounded-md object-contain" /> : <PlatformBadge platform={acc.platform} className="size-7 text-[11px]" />}
+                    {acc.logoUrl ?? accountCompany?.logo_url ? <img src={acc.logoUrl ?? accountCompany?.logo_url ?? ""} alt={`Logo da ${acc.name}`} className="size-7 shrink-0 rounded-md object-contain" /> : <PlatformBadge platform={acc.platform} className="size-7 text-[11px]" />}
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-medium truncate">{acc.name}</p>
                       <p className="text-[10px] text-muted-foreground truncate">{acc.accountId}</p>
