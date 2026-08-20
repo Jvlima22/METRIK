@@ -94,13 +94,31 @@ export function AccountSwitcher({ collapsed }: { collapsed: boolean }) {
         <DropdownMenuContent align="start" sideOffset={6} className="w-80">
           {isAdmin && companies.length > 0 && <>
             <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">Empresas clientes</DropdownMenuLabel>
+            <div className="px-1 pb-2">
+              <select
+                value={selectedCompanyId ?? ""}
+                onChange={(event) => {
+                  const companyId = event.target.value;
+                  if (companyId) chooseCompany(companyId);
+                  else {
+                    setSelectedCompanyId(null);
+                    setActiveCompanyId(null);
+                  }
+                }}
+                className="h-8 w-full rounded-md border border-border bg-white px-2 text-xs font-medium text-foreground outline-none focus:border-violet-400"
+                aria-label="Selecionar empresa cliente"
+              >
+                <option value="">Todas as empresas</option>
+                {companies.map((company) => <option key={company.id} value={company.id}>{company.name}</option>)}
+              </select>
+            </div>
             <div className="space-y-1 px-1 pb-2">
               {companies.map((company) => {
                 const selected = selectedCompanyId === company.id;
                 const companyAccounts = accounts.filter((account) => account.companyId === company.id);
                 const hasConnectedAccount = companyAccounts.length > 0;
-                return <div key={company.id} className={cn('rounded-lg border p-2', selected ? 'border-violet/40 bg-violet/5' : 'border-border')}>
-                  <div className="flex items-center gap-2">{company.logo_url ? <img src={company.logo_url} alt={`Logo da ${company.name}`} className="size-7 shrink-0 rounded-md object-contain" /> : <PlatformBadge platform="GOOGLE_ADS" className="size-7 shrink-0 text-[10px]" />}<div className="min-w-0 flex-1"><p className="truncate text-xs font-semibold">{company.name}</p><p className="truncate text-[10px] text-muted-foreground">{company.document || 'CNPJ pendente'} · {company.status}</p></div>{!hasConnectedAccount && <button type="button" className="rounded-md px-1.5 py-1 text-[10px] font-medium text-violet hover:bg-violet/10" onClick={() => { chooseCompany(company.id); setAddOpen(true); }}>Adicionar</button>}<button type="button" className="rounded-md px-1.5 py-1 text-[10px] font-medium text-muted-foreground hover:bg-accent" onClick={() => { chooseCompany(company.id); setManageOpen(true); }}>Gerenciar</button></div>
+                return <div key={company.id} onClick={() => chooseCompany(company.id)} role="button" tabIndex={0} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') chooseCompany(company.id); }} className={cn('cursor-pointer rounded-lg border p-2', selected ? 'border-violet/40 bg-violet/5' : 'border-border')}>
+                  <div className="flex items-center gap-2">{company.logo_url ? <img src={company.logo_url} alt={`Logo da ${company.name}`} className="size-7 shrink-0 rounded-md object-contain" /> : <PlatformBadge platform="GOOGLE_ADS" className="size-7 shrink-0 text-[10px]" />}<div className="min-w-0 flex-1"><p className="truncate text-xs font-semibold">{company.name}</p><p className="truncate text-[10px] text-muted-foreground">{company.document || 'CNPJ pendente'} · {company.status}</p></div>{!hasConnectedAccount && <button type="button" className="rounded-md px-1.5 py-1 text-[10px] font-medium text-violet hover:bg-violet/10" onClick={(event) => { event.stopPropagation(); chooseCompany(company.id); setAddOpen(true); }}>Adicionar</button>}<button type="button" className="rounded-md px-1.5 py-1 text-[10px] font-medium text-muted-foreground hover:bg-accent" onClick={(event) => { event.stopPropagation(); chooseCompany(company.id); setManageOpen(true); }}>Gerenciar</button></div>
                 </div>;
               })}
             </div>
