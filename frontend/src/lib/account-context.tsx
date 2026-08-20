@@ -65,6 +65,21 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         const storedList = localStorage.getItem(listKey);
         const parsed = storedList ? JSON.parse(storedList) as AdAccount[] : [];
         const saved = Array.isArray(parsed) ? parsed : [];
+        const serverAccounts: AdAccount[] = isAdmin
+          ? ((await apiFetch<{ data: Array<{ id: string; company_id: string; platform: AccountPlatform; external_account_id: string; name: string; status: string; company_name?: string }> }>('/integrations/admin/accounts')).data ?? []).map((account) => ({
+              id: `server-${account.id}`,
+              platform: account.platform,
+              name: account.name,
+              accountId: account.external_account_id,
+              status: account.status === 'ERROR' ? 'error' : account.status === 'PAUSED' ? 'pending' : 'active',
+              currency: 'BRL',
+              companyId: account.company_id,
+              companyName: account.company_name,
+            }))
+          : [];
+        const byAccountKey = (account: AdAccount) => `${account.companyId ?? 'global'}:${account.platform}:${account.accountId}`;
+        const mergedAccounts = [...serverAccounts, ...saved];
+        const uniqueAccounts = mergedAccounts.filter((account, index, list) => list.findIndex((candidate) => byAccountKey(candidate) === byAccountKey(account)) === index);
         nextAccounts = isAdmin
           ? [
               // As contas demo pertencem exclusivamente ao Global Admin. O seed
@@ -72,9 +87,9 @@ export function AccountProvider({ children }: { children: ReactNode }) {
               // persistida no navegador sem essa marcação.
               ...initialAccounts.map((seed) => {
                 const savedAccount = saved.find((account) => account.id === seed.id);
-                return savedAccount ? { ...seed, ...savedAccount, brandKey: seed.brandKey } : seed;
+                return savedAccount ? { ...seed, ...savedAccount, brandKey: seed.brandKey, logoUrl: seed.logoUrl } : seed;
               }),
-              ...saved.filter((account) => !initialAccounts.some((seed) => seed.id === account.id)),
+              ...uniqueAccounts.filter((account) => !initialAccounts.some((seed) => seed.id === account.id)),
             ]
           : saved.filter((account) => Boolean(account.companyId));
         storedCompanyId = isAdmin ? null : localStorage.getItem(companyKey);
@@ -162,6 +177,14 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     };
     setAllAccounts((prev) => [...prev, acc]);
     setActiveId(acc.id);
+    if (acc.companyId) {
+      void apiFetch('/integrations/accounts', {
+        method: 'POST',
+        body: JSON.stringify({ platform: acc.platform, externalAccountId: acc.accountId, name: acc.name }),
+      }).catch(() => {
+        // A conta local continua disponível mesmo se a sincronização remota falhar.
+      });
+    }
     return acc;
   }
 
