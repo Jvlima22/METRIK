@@ -19,7 +19,7 @@ import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 
 const PLATFORM_ORDER: AccountPlatform[] = ["GOOGLE_ADS", "META_ADS"];
-type Company = { id: string; name: string; status: string; document?: string | null };
+type Company = { id: string; name: string; status: string; document?: string | null; logo_url?: string | null };
 
 /**
  * Account switcher shown under the Metrik logo in the sidebar. Lists the
@@ -33,6 +33,7 @@ export function AccountSwitcher({ collapsed }: { collapsed: boolean }) {
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(activeCompanyId);
   const [addOpen, setAddOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
+  const selectedCompany = companies.find((company) => company.id === activeCompanyId);
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -59,7 +60,7 @@ export function AccountSwitcher({ collapsed }: { collapsed: boolean }) {
             )}
             aria-label="Trocar de conta"
           >
-            <PlatformBadge platform={activeAccount.platform} className="size-8 text-xs" />
+            {selectedCompany?.logo_url ? <img src={selectedCompany.logo_url} alt={`Logo da ${selectedCompany.name}`} className="size-8 rounded-lg object-contain" /> : <PlatformBadge platform={activeAccount.platform} className="size-8 text-xs" />}
             {!collapsed && (
               <>
                 <div className="min-w-0 flex-1">
@@ -81,7 +82,7 @@ export function AccountSwitcher({ collapsed }: { collapsed: boolean }) {
               {companies.map((company) => {
                 const selected = selectedCompanyId === company.id;
                 return <div key={company.id} className={cn('rounded-lg border p-2', selected ? 'border-violet/40 bg-violet/5' : 'border-border')}>
-                  <div className="flex items-center gap-2"><div className="min-w-0 flex-1"><p className="truncate text-xs font-semibold">{company.name}</p><p className="truncate text-[10px] text-muted-foreground">{company.document || 'CNPJ pendente'} · {company.status}</p></div><button type="button" className="rounded-md px-1.5 py-1 text-[10px] font-medium text-violet hover:bg-violet/10" onClick={() => { chooseCompany(company.id); setAddOpen(true); }}>Adicionar</button><button type="button" className="rounded-md px-1.5 py-1 text-[10px] font-medium text-muted-foreground hover:bg-accent" onClick={() => { chooseCompany(company.id); setManageOpen(true); }}>Gerenciar</button></div>
+                  <div className="flex items-center gap-2">{company.logo_url ? <img src={company.logo_url} alt={`Logo da ${company.name}`} className="size-7 shrink-0 rounded-md object-contain" /> : <PlatformBadge platform="GOOGLE_ADS" className="size-7 shrink-0 text-[10px]" />}<div className="min-w-0 flex-1"><p className="truncate text-xs font-semibold">{company.name}</p><p className="truncate text-[10px] text-muted-foreground">{company.document || 'CNPJ pendente'} · {company.status}</p></div><button type="button" className="rounded-md px-1.5 py-1 text-[10px] font-medium text-violet hover:bg-violet/10" onClick={() => { chooseCompany(company.id); setAddOpen(true); }}>Adicionar</button><button type="button" className="rounded-md px-1.5 py-1 text-[10px] font-medium text-muted-foreground hover:bg-accent" onClick={() => { chooseCompany(company.id); setManageOpen(true); }}>Gerenciar</button></div>
                 </div>;
               })}
             </div>

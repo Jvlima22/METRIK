@@ -6,7 +6,7 @@ const LOGO_BUCKET = 'company-assets';
 const MAX_LOGO_BYTES = 2 * 1024 * 1024;
 const companyFields = 'id,name,slug,document,legal_name,trade_name,corporate_email,corporate_phone,website,segment,address,city,state,postal_code,country,timezone,logo_path,status,created_at,updated_at';
 
-async function withLogoUrl<T extends Record<string, unknown>>(company: T): Promise<T & { logo_url: string | null }> {
+export async function withLogoUrl<T extends Record<string, unknown>>(company: T): Promise<T & { logo_url: string | null }> {
   if (!company.logo_path || typeof company.logo_path !== 'string') return { ...company, logo_url: null };
   const { data } = await getSupabaseAdmin().storage.from(LOGO_BUCKET).createSignedUrl(company.logo_path, 3600);
   return { ...company, logo_url: data?.signedUrl ?? null };

@@ -3,6 +3,7 @@ import { env } from '../config/env';
 import { AppError } from '../utils/AppError';
 import type { CompanyRole } from '../types/express';
 import { describeError, describeErrorCode, describeErrorMetadata } from '../utils/error-message';
+import { withLogoUrl } from './company-profile.service';
 
 function slugify(value: string): string {
   const slug = value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 80);
@@ -10,9 +11,9 @@ function slugify(value: string): string {
 }
 
 export async function listCompanies() {
-  const { data, error } = await getSupabaseAdmin().from('companies').select('id,name,slug,document,status,timezone,created_at,updated_at').order('name');
+  const { data, error } = await getSupabaseAdmin().from('companies').select('id,name,slug,document,logo_path,status,timezone,created_at,updated_at').order('name');
   if (error) throw new AppError(`Não foi possível listar empresas: ${error.message}`, 500);
-  return data ?? [];
+  return Promise.all((data ?? []).map((company) => withLogoUrl(company as Record<string, unknown>)));
 }
 
 export async function createCompany(input: { name: string; document?: string; timezone?: string; adminUserId: string; inviteEmail?: string }) {
