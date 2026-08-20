@@ -39,7 +39,10 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   const { user, isAdmin, loading: authLoading } = useAuth();
   const [allAccounts, setAllAccounts] = useState<AdAccount[]>([]);
   const [activeId, setActiveId] = useState<string>(EMPTY_ACCOUNT.id);
-  const [activeCompanyId, setActiveCompanyIdState] = useState<string | null>(null);
+  const [activeCompanyId, setActiveCompanyIdState] = useState<string | null>(() => {
+    if (typeof window === "undefined" || !user?.id || isAdmin) return null;
+    try { return window.localStorage.getItem(`metrik:${user.id}:active-company`); } catch { return null; }
+  });
   const storagePrefix = user?.id ? `metrik:${user.id}` : "metrik:anonymous";
   const listKey = `${storagePrefix}:accounts`;
   const activeKey = `${storagePrefix}:active-account`;

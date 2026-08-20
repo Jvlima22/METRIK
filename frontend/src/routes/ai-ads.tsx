@@ -20,6 +20,18 @@ const opportunities: Opportunity[] = [
 const slotPositions = ["left-1/2 top-0 -translate-x-1/2", "right-[12%] top-[14%]", "right-0 top-1/2 -translate-y-1/2", "right-[12%] bottom-[14%]", "left-1/2 bottom-0 -translate-x-1/2", "left-[12%] bottom-[14%]", "left-0 top-1/2 -translate-y-1/2", "left-[12%] top-[14%]"];
 const logoSlugs: Record<string, string> = { openai: "openai", claude: "claude", manus: "manus", kimi: "kimi", pipedrive: "pipedrive", "google-ads": "googleads", "meta-ads": "meta", "custom-api": "api" };
 
+type CompanyLogoState = { url: string | null; name: string };
+const defaultCompanyLogo: CompanyLogoState = { url: null, name: "Metrik" };
+function readCompanyLogoCache(companyId: string | null): CompanyLogoState {
+  if (!companyId || typeof window === "undefined") return defaultCompanyLogo;
+  try {
+    const cached = window.localStorage.getItem(`metrik:company-logo:${companyId}`);
+    if (!cached) return defaultCompanyLogo;
+    const parsed = JSON.parse(cached) as Partial<CompanyLogoState>;
+    return { url: typeof parsed.url === "string" && parsed.url ? parsed.url : null, name: parsed.name || "Metrik" };
+  } catch { return defaultCompanyLogo; }
+}
+
 function ProviderLogo({ provider, size = 30 }: { provider: IntegrationDefinition; size?: number }) {
   const assets: Record<string, string> = { openai: "chatgpt.png", manus: "manus.png", claude: "claude.png", kimi: "kimi.png", pipedrive: "pipedrive.png", "google-ads": "google-ads.png", "meta-ads": "meta-ads.png" };
   const marks: Record<string, string> = { openai: "✦", claude: "C", manus: "M", kimi: "K", pipedrive: "P", "google-ads": "G", "meta-ads": "∞", "custom-api": "↗" };
@@ -38,12 +50,18 @@ function AdsOverview() {
 
 function HubTab() {
   const { activeCompanyId } = useAccount();
-  const [companyLogo, setCompanyLogo] = useState<{ url: string | null; name: string }>({ url: null, name: 'Metrik' });
+  const [companyLogo, setCompanyLogo] = useState<CompanyLogoState>(() => readCompanyLogoCache(activeCompanyId));
   useEffect(() => {
-    if (!activeCompanyId) { setCompanyLogo({ url: null, name: 'Metrik' }); return; }
+    if (!activeCompanyId) { setCompanyLogo(defaultCompanyLogo); return; }
+    const cached = readCompanyLogoCache(activeCompanyId);
+    setCompanyLogo(cached);
     apiFetch<{ data: { name?: string; logo_url?: string | null } }>('/company-profile')
-      .then(({ data }) => setCompanyLogo({ url: data.logo_url ?? null, name: data.name || 'Metrik' }))
-      .catch(() => setCompanyLogo({ url: null, name: 'Metrik' }));
+      .then(({ data }) => {
+        const next = { url: data.logo_url ?? null, name: data.name || 'Metrik' };
+        setCompanyLogo(next);
+        try { window.localStorage.setItem(`metrik:company-logo:${activeCompanyId}`, JSON.stringify(next)); } catch { /* cache opcional */ }
+      })
+      .catch(() => undefined);
   }, [activeCompanyId]);
   const emptyConnections = () => Array.from({ length: 8 }, (_, slot) => ({ slot, status: "EMPTY" as const, scopes: [] }));
   const hubStorageKey = activeCompanyId ? `metrik:hub-connections:${activeCompanyId}` : null;
