@@ -49,9 +49,17 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
+  const isChunkError = /dynamically imported module|failed to fetch dynamically imported module|loading chunk|importing a module script failed/i.test(error.message);
   useEffect(() => {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
+    if (!isChunkError || typeof window === "undefined") return;
+    const recoveryKey = `metrik:chunk-recovery:${window.location.pathname}`;
+    if (window.sessionStorage.getItem(recoveryKey) === "1") return;
+    window.sessionStorage.setItem(recoveryKey, "1");
+    const url = new URL(window.location.href);
+    url.searchParams.set("_asset_refresh", String(Date.now()));
+    window.location.replace(url.toString());
+  }, [error, isChunkError]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
