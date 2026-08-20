@@ -29,7 +29,7 @@ type AccountContextValue = {
   activeCompanyId: string | null;
   setActiveCompanyId: (id: string | null) => void;
   setActiveAccount: (id: string) => void;
-  addAccount: (input: AddAccountInput) => AdAccount;
+  addAccount: (input: AddAccountInput) => Promise<AdAccount>;
   updateAccount: (id: string, patch: Partial<Pick<AdAccount, "name" | "figmaFileKey">>) => void;
   removeAccount: (id: string) => void;
 };
@@ -173,7 +173,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  function addAccount(input: AddAccountInput): AdAccount {
+  async function addAccount(input: AddAccountInput): Promise<AdAccount> {
     const acc: AdAccount = {
       id: `acc-${Date.now()}`,
       platform: input.platform,
@@ -185,17 +185,15 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       companyId: input.companyId || activeCompanyId || undefined,
       companyName: input.companyName?.trim() || undefined,
     };
-    setAllAccounts((prev) => [...prev, acc]);
-    setActiveId(acc.id);
-    if (acc.companyId) {
-      void apiFetch('/integrations/accounts', {
-        method: 'POST',
-        body: JSON.stringify({ platform: acc.platform, externalAccountId: acc.accountId, name: acc.name }),
-      }).catch(() => {
-        // A conta local continua disponível mesmo se a sincronização remota falhar.
-      });
-    }
-    return acc;
+    if (!acc.companyId) throw new Error('Selecione uma empresa antes de adicionar uma conta de anúncios.');
+    const response = await apiFetch<{ data: { id: string; external_account_id: string; name: string; status: string } }>('/integrations/accounts', {
+      method: 'POST',
+      body: JSON.stringify({ platform: acc.platform, externalAccountId: acc.accountId, name: acc.name }),
+    });
+    const validatedAccount: AdAccount = { ...acc, id: response.data.id, accountId: response.data.external_account_id, name: response.data.name, status: response.data.status === 'ERROR' ? 'error' : 'active' };
+    setAllAccounts((prev) => [...prev.filter((account) => `${account.companyId}:${account.platform}:${account.accountId}` !== `${validatedAccount.companyId}:${validatedAccount.platform}:${validatedAccount.accountId}`), validatedAccount]);
+    setActiveId(validatedAccount.id);
+    return validatedAccount;
   }
 
   function updateAccount(id: string, patch: Partial<Pick<AdAccount, "name" | "figmaFileKey">>) {

@@ -36,6 +36,8 @@ export function AddAccountDialog({
   const [name, setName] = useState("");
   const [accountId, setAccountId] = useState("");
   const [figmaFileKey, setFigmaFileKey] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const idHint = platform === "GOOGLE_ADS" ? "Ex.: 864-652-2223" : "Ex.: act_1029384756";
   const valid = name.trim().length > 1 && accountId.trim().length > 3;
@@ -45,14 +47,23 @@ export function AddAccountDialog({
     setName("");
     setAccountId("");
     setFigmaFileKey("");
+    setErrorMessage("");
   }
 
-  function submit(e: FormEvent) {
+  async function submit(e: FormEvent) {
     e.preventDefault();
-    if (!valid) return;
-    addAccount({ platform, name, accountId, figmaFileKey });
-    reset();
-    onOpenChange(false);
+    if (!valid || submitting) return;
+    setSubmitting(true);
+    setErrorMessage("");
+    try {
+      await addAccount({ platform, name, accountId, figmaFileKey });
+      reset();
+      onOpenChange(false);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Não foi possível validar esta conta.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -104,7 +115,7 @@ export function AddAccountDialog({
               className="bg-white"
             />
             <p className="text-[11px] text-muted-foreground">
-              Mock — nenhuma credencial real é enviada. A conta entra como “Pendente”.
+              O ID e as credenciais serão validados pela plataforma antes de salvar a conta.
             </p>
           </div>
 
@@ -127,12 +138,13 @@ export function AddAccountDialog({
             </Button>
             <Button
               type="submit"
-              disabled={!valid}
+              disabled={!valid || submitting}
               className="bg-foreground text-background hover:bg-foreground/90"
             >
-              Adicionar conta
+              {submitting ? "Validando conta..." : "Validar e adicionar"}
             </Button>
           </DialogFooter>
+          {errorMessage && <p role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">{errorMessage}</p>}
         </form>
       </DialogContent>
     </Dialog>

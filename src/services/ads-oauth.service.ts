@@ -42,7 +42,7 @@ export async function createOAuthAuthorization(userId: string, companyId: string
   url.searchParams.set('client_id', env.META_ADS_APP_ID);
   url.searchParams.set('redirect_uri', callbackUrl(providerInput));
   url.searchParams.set('response_type', 'code');
-  url.searchParams.set('scope', 'ads_read');
+  url.searchParams.set('scope', 'ads_read,ads_management,business_management');
   url.searchParams.set('state', nonce);
   return { provider: providerInput, authorizationUrl: url.toString(), state: nonce };
 }
@@ -82,8 +82,8 @@ export async function completeOAuth(providerInput: string, code: string, nonce: 
   const redirectUri = callbackUrl(providerInput);
   if (providerInput === 'google-ads') {
     const token = await exchangeGoogleCode(code, redirectUri);
-    return createConnection(state.user_id, state.company_id, { provider: providerInput, authType: 'OAUTH2', workspaceName: 'Google Ads', scopes: ['https://www.googleapis.com/auth/adwords'], metadata: { oauth: true, connectedAt: new Date().toISOString() }, status: 'CONNECTED', credentials: { accessToken: token.access_token, refreshToken: token.refresh_token, expiresAt: token.expires_in ? Date.now() + token.expires_in * 1000 : null } });
+    return createConnection(state.user_id, state.company_id, { provider: providerInput, authType: 'OAUTH2', workspaceName: 'Google Ads', scopes: ['https://www.googleapis.com/auth/adwords'], metadata: { oauth: true, validationRequired: true, connectedAt: new Date().toISOString() }, status: 'DRAFT', credentials: { accessToken: token.access_token, refreshToken: token.refresh_token, expiresAt: token.expires_in ? Date.now() + token.expires_in * 1000 : null } });
   }
   const token = await exchangeMetaCode(code, redirectUri);
-  return createConnection(state.user_id, state.company_id, { provider: providerInput, authType: 'OAUTH2', workspaceName: 'Meta Ads', scopes: ['ads_read'], metadata: { oauth: true, connectedAt: new Date().toISOString() }, status: 'CONNECTED', credentials: { accessToken: token.access_token, expiresAt: token.expires_in ? Date.now() + token.expires_in * 1000 : null } });
+  return createConnection(state.user_id, state.company_id, { provider: providerInput, authType: 'OAUTH2', workspaceName: 'Meta Ads', scopes: ['ads_read'], metadata: { oauth: true, validationRequired: true, connectedAt: new Date().toISOString() }, status: 'DRAFT', credentials: { accessToken: token.access_token, expiresAt: token.expires_in ? Date.now() + token.expires_in * 1000 : null } });
 }
