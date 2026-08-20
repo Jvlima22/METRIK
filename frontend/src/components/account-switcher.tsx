@@ -21,6 +21,14 @@ import { useAuth } from "@/lib/auth-context";
 const PLATFORM_ORDER: AccountPlatform[] = ["GOOGLE_ADS", "META_ADS"];
 type Company = { id: string; name: string; status: string; document?: string | null; logo_url?: string | null };
 
+const MOCK_COMPANIES: Company[] = [
+  { id: "mock-lumen", name: "Lumen Store — Brasil", status: "DEMO", document: "864-652-2223" },
+  { id: "mock-atlas", name: "Atlas Travel", status: "DEMO", document: "412-908-1170" },
+  { id: "mock-vintech", name: "Vintech", status: "DEMO", document: "738-204-9961", logo_url: "/vintech-logo.png" },
+  { id: "mock-aura", name: "Aura Cosmetics", status: "DEMO", document: "act_1029384756" },
+  { id: "mock-tgl", name: "TGL Solutions — Demo", status: "DEMO", document: "905-417-2230" },
+];
+
 /**
  * Account switcher shown under the Metrik logo in the sidebar. Lists the
  * connected accounts grouped by platform, plus shortcuts to add / manage.
@@ -43,7 +51,9 @@ export function AccountSwitcher({ collapsed }: { collapsed: boolean }) {
       try {
         if (isAdmin) {
           const { data } = await apiFetch<{ data: Company[] }>('/companies');
-          if (!cancelled) setCompanies(data);
+          const existingNames = new Set(data.map((company) => company.name.toLowerCase()));
+          const mockCompanies = MOCK_COMPANIES.filter((company) => !existingNames.has(company.name.toLowerCase()));
+          if (!cancelled) setCompanies([...data, ...mockCompanies]);
           return;
         }
         const { data } = await apiFetch<{ data: Company }>('/company-profile');

@@ -69,17 +69,17 @@ export const PLATFORM_DATA_KEY: Record<AccountPlatform, "google-ads" | "meta-ads
 };
 
 export const initialAccounts: AdAccount[] = [
-  { id: "acc-g-001", platform: "GOOGLE_ADS", name: "Lumen Store — Brasil", accountId: "864-652-2223", status: "active", currency: "BRL", figmaFileKey: "p7VgDkFNwCYcdUNX5YALLw", claudeProjectId: "514627cc-a1e1-4f38-8249-06abe1dd9667", brandKey: "lumen" },
-  { id: "acc-g-002", platform: "GOOGLE_ADS", name: "Atlas Travel", accountId: "412-908-1170", status: "pending", currency: "BRL", brandKey: "atlas" },
-  { id: "acc-m-001", platform: "META_ADS", name: "Aura Cosmetics", accountId: "act_1029384756", status: "active", currency: "BRL", brandKey: "aura" },
+  { id: "acc-g-001", platform: "GOOGLE_ADS", name: "Lumen Store — Brasil", accountId: "864-652-2223", status: "active", currency: "BRL", companyId: "mock-lumen", companyName: "Lumen Store — Brasil", figmaFileKey: "p7VgDkFNwCYcdUNX5YALLw", claudeProjectId: "514627cc-a1e1-4f38-8249-06abe1dd9667", brandKey: "lumen" },
+  { id: "acc-g-002", platform: "GOOGLE_ADS", name: "Atlas Travel", accountId: "412-908-1170", status: "pending", currency: "BRL", companyId: "mock-atlas", companyName: "Atlas Travel", brandKey: "atlas" },
+  { id: "acc-m-001", platform: "META_ADS", name: "Aura Cosmetics", accountId: "act_1029384756", status: "active", currency: "BRL", companyId: "mock-aura", companyName: "Aura Cosmetics", brandKey: "aura" },
 
   // Vintech — SaaS wine-tech (gestão/vendas para vinícolas e importadoras).
-  { id: "acc-g-vintech", platform: "GOOGLE_ADS", name: "Vintech", accountId: "738-204-9961", status: "active", currency: "BRL", brandKey: "vintech", logoUrl: "/vintech-logo.png", claudeProjectId: "514627cc-a1e1-4f38-8249-06abe1dd9667" },
-  { id: "acc-m-vintech", platform: "META_ADS", name: "Vintech", accountId: "act_7790231845", status: "active", currency: "BRL", brandKey: "vintech", logoUrl: "/vintech-logo.png", claudeProjectId: "514627cc-a1e1-4f38-8249-06abe1dd9667" },
+  { id: "acc-g-vintech", platform: "GOOGLE_ADS", name: "Vintech", accountId: "738-204-9961", status: "active", currency: "BRL", companyId: "mock-vintech", companyName: "Vintech", brandKey: "vintech", logoUrl: "/vintech-logo.png", claudeProjectId: "514627cc-a1e1-4f38-8249-06abe1dd9667" },
+  { id: "acc-m-vintech", platform: "META_ADS", name: "Vintech", accountId: "act_7790231845", status: "active", currency: "BRL", companyId: "mock-vintech", companyName: "Vintech", brandKey: "vintech", logoUrl: "/vintech-logo.png", claudeProjectId: "514627cc-a1e1-4f38-8249-06abe1dd9667" },
 
   // TGL Solutions — automação + IA sob medida para empresas.
-  { id: "acc-g-tgl", platform: "GOOGLE_ADS", name: "TGL Solutions", accountId: "905-417-2230", status: "active", currency: "BRL", brandKey: "tgl" },
-  { id: "acc-m-tgl", platform: "META_ADS", name: "TGL Solutions", accountId: "act_6612089734", status: "active", currency: "BRL", brandKey: "tgl" },
+  { id: "acc-g-tgl", platform: "GOOGLE_ADS", name: "TGL Solutions", accountId: "905-417-2230", status: "active", currency: "BRL", companyId: "mock-tgl", companyName: "TGL Solutions — Demo", brandKey: "tgl" },
+  { id: "acc-m-tgl", platform: "META_ADS", name: "TGL Solutions", accountId: "act_6612089734", status: "active", currency: "BRL", companyId: "mock-tgl", companyName: "TGL Solutions — Demo", brandKey: "tgl" },
 ];
 
 /**
