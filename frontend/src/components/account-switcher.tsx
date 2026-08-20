@@ -9,6 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { PlatformBadge } from "@/components/platform-badge";
 import { AddAccountDialog } from "@/components/add-account-dialog";
 import { ManageAccountsDialog } from "@/components/manage-accounts-dialog";
@@ -41,7 +42,7 @@ export function AccountSwitcher({ collapsed }: { collapsed: boolean }) {
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(activeCompanyId);
   const [addOpen, setAddOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
-  const [companyPickerOpen, setCompanyPickerOpen] = useState(true);
+  const [companySheetOpen, setCompanySheetOpen] = useState(false);
   const selectedCompany = companies.find((company) => company.id === activeCompanyId);
   const activeAccountCompany = companies.find((company) => company.id === activeAccount.companyId) ?? selectedCompany;
   const activeAccountLogo = activeAccount.logoUrl ?? activeAccountCompany?.logo_url;
@@ -107,10 +108,9 @@ export function AccountSwitcher({ collapsed }: { collapsed: boolean }) {
             <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">Empresas clientes</DropdownMenuLabel>
             <button
               type="button"
-              onClick={(event) => { event.preventDefault(); event.stopPropagation(); setCompanyPickerOpen((open) => !open); }}
+              onClick={(event) => { event.preventDefault(); event.stopPropagation(); setCompanySheetOpen(true); }}
               className="mx-1 mb-2 flex w-[calc(100%-8px)] items-center gap-2.5 rounded-xl border border-border bg-white/70 px-2.5 py-2 text-left transition-colors hover:bg-accent"
-              aria-expanded={companyPickerOpen}
-              aria-label="Selecionar empresa cliente"
+              aria-label="Abrir seletor de empresas clientes"
             >
               {selectedCompany?.logo_url ? <img src={selectedCompany.logo_url} alt={`Logo da ${selectedCompany.name}`} className="size-8 rounded-lg object-contain" /> : <PlatformBadge platform="GOOGLE_ADS" className="size-8 text-xs" />}
               <span className="min-w-0 flex-1">
@@ -119,16 +119,6 @@ export function AccountSwitcher({ collapsed }: { collapsed: boolean }) {
               </span>
               <ChevronsUpDown className="size-3.5 shrink-0 text-muted-foreground" />
             </button>
-            {companyPickerOpen && <div className="space-y-1 px-1 pb-2">
-              {companies.map((company) => {
-                const selected = selectedCompanyId === company.id;
-                const companyAccounts = allAccounts.filter((account) => account.companyId === company.id);
-                const hasConnectedAccount = companyAccounts.length > 0;
-                return <div key={company.id} onClick={() => chooseCompany(company.id)} role="button" tabIndex={0} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') chooseCompany(company.id); }} className={cn('cursor-pointer rounded-lg border p-2', selected ? 'border-violet/40 bg-violet/5' : 'border-border')}>
-                  <div className="flex items-center gap-2">{company.logo_url ? <img src={company.logo_url} alt={`Logo da ${company.name}`} className="size-7 shrink-0 rounded-md object-contain" /> : <PlatformBadge platform="GOOGLE_ADS" className="size-7 shrink-0 text-[10px]" />}<div className="min-w-0 flex-1"><p className="truncate text-xs font-semibold">{company.name}</p><p className="truncate text-[10px] text-muted-foreground">{company.document || 'CNPJ pendente'} · {company.status}</p></div>{!hasConnectedAccount && <button type="button" className="rounded-md px-1.5 py-1 text-[10px] font-medium text-violet hover:bg-violet/10" onClick={(event) => { event.stopPropagation(); chooseCompany(company.id); setAddOpen(true); }}>Adicionar</button>}<button type="button" className="rounded-md px-1.5 py-1 text-[10px] font-medium text-muted-foreground hover:bg-accent" onClick={(event) => { event.stopPropagation(); chooseCompany(company.id); setManageOpen(true); }}>Gerenciar</button></div>
-                </div>;
-              })}
-            </div>}
             <DropdownMenuSeparator />
           </>}
           {isAdmin && !selectedCompanyId && (
@@ -180,6 +170,29 @@ export function AccountSwitcher({ collapsed }: { collapsed: boolean }) {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <Sheet open={companySheetOpen} onOpenChange={setCompanySheetOpen}>
+        <SheetContent side="left" className="w-full max-w-sm bg-white/95 p-0 backdrop-blur-xl">
+          <SheetHeader className="border-b border-border px-5 py-4 text-left">
+            <SheetTitle className="font-display text-lg">Empresas clientes</SheetTitle>
+            <SheetDescription className="text-xs">Selecione uma empresa para filtrar as contas Google Ads e Meta Ads.</SheetDescription>
+          </SheetHeader>
+          <div className="space-y-2 overflow-y-auto p-4">
+            {companies.map((company) => {
+              const selected = selectedCompanyId === company.id;
+              const companyAccounts = allAccounts.filter((account) => account.companyId === company.id);
+              const hasConnectedAccount = companyAccounts.length > 0;
+              return <div key={company.id} onClick={() => { chooseCompany(company.id); setCompanySheetOpen(false); }} role="button" tabIndex={0} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { chooseCompany(company.id); setCompanySheetOpen(false); } }} className={cn('cursor-pointer rounded-xl border bg-white p-3 shadow-sm transition-colors', selected ? 'border-violet/40 bg-violet/5' : 'border-border hover:bg-accent')}>
+                <div className="flex items-center gap-2.5">
+                  {company.logo_url ? <img src={company.logo_url} alt={`Logo da ${company.name}`} className="size-9 shrink-0 rounded-lg object-contain" /> : <PlatformBadge platform="GOOGLE_ADS" className="size-9 shrink-0 text-xs" />}
+                  <div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold">{company.name}</p><p className="truncate text-[11px] text-muted-foreground">{company.document || 'CNPJ pendente'} · {company.status}</p></div>
+                  {hasConnectedAccount ? <button type="button" className="rounded-md px-2 py-1 text-[11px] font-medium text-muted-foreground hover:bg-accent" onClick={(event) => { event.stopPropagation(); chooseCompany(company.id); setCompanySheetOpen(false); setManageOpen(true); }}>Gerenciar</button> : <button type="button" className="rounded-md px-2 py-1 text-[11px] font-medium text-violet hover:bg-violet/10" onClick={(event) => { event.stopPropagation(); chooseCompany(company.id); setCompanySheetOpen(false); setAddOpen(true); }}>Adicionar</button>}
+                </div>
+              </div>;
+            })}
+          </div>
+        </SheetContent>
+      </Sheet>
 
       <AddAccountDialog open={addOpen} onOpenChange={setAddOpen} />
       <ManageAccountsDialog
