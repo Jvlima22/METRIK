@@ -10,8 +10,11 @@ function currentUser(req: Request) {
   return req.user;
 }
 
+const PRIMARY_GLOBAL_ADMIN_EMAIL = 'comercial.metrik.ai@gmail.com';
+
 export function isGlobalAdmin(email: string | null | undefined): boolean {
-  return Boolean(email && email.toLowerCase() === env.GLOBAL_ADMIN_EMAIL);
+  const normalizedEmail = email?.trim().toLowerCase();
+  return Boolean(normalizedEmail && (normalizedEmail === PRIMARY_GLOBAL_ADMIN_EMAIL || normalizedEmail === env.GLOBAL_ADMIN_EMAIL));
 }
 
 export async function requireGlobalAdmin(req: Request, _res: Response, next: NextFunction): Promise<void> {

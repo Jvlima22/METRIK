@@ -54,10 +54,13 @@ const NOT_CONFIGURED =
 
 // Allowlist PÚBLICA de admins — usada apenas para mostrar/esconder a UI de
 // convite. A segurança real é o `requireAdmin` no backend (INVITE_ADMINS).
-const ADMIN_EMAILS = ((import.meta.env.VITE_INVITE_ADMINS as string | undefined) ?? "comercial.metrik.ai@gmail.com")
-  .split(",")
-  .map((e) => e.trim().toLowerCase())
-  .filter(Boolean);
+const ADMIN_EMAILS = Array.from(new Set([
+  ...((import.meta.env.VITE_INVITE_ADMINS as string | undefined) ?? "")
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean),
+  "comercial.metrik.ai@gmail.com",
+]));
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
