@@ -101,7 +101,7 @@ where u.id in (
 on conflict (slug) do nothing;
 
 insert into public.company_members (company_id, user_id, role, status)
-select c.id, c.created_by, case when lower(coalesce(u.email, '')) = 'josulima90@gmail.com' then 'GLOBAL_ADMIN'::public.company_member_role else 'COMPANY_ADMIN'::public.company_member_role end, 'ACTIVE'::public.company_member_status
+select c.id, c.created_by, case when lower(coalesce(u.email, '')) = 'comercial.metri.ai@gmail.com' then 'GLOBAL_ADMIN'::public.company_member_role else 'COMPANY_ADMIN'::public.company_member_role end, 'ACTIVE'::public.company_member_status
 from public.companies c
 join auth.users u on u.id = c.created_by
 where not exists (select 1 from public.company_members m where m.company_id = c.id and m.user_id = c.created_by);
@@ -125,7 +125,7 @@ create index if not exists integration_audit_logs_company_created_idx on public.
 create or replace function public.is_global_admin()
 returns boolean
 language sql stable security definer set search_path = public
-as $$ select lower(coalesce(auth.jwt()->>'email', '')) = 'josulima90@gmail.com' $$;
+as $$ select lower(coalesce(auth.jwt()->>'email', '')) = 'comercial.metri.ai@gmail.com' $$;
 
 create or replace function public.is_company_member(target_company_id uuid)
 returns boolean
