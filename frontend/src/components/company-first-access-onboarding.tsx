@@ -88,7 +88,7 @@ export function CompanyFirstAccessOnboarding() {
   }, [activeCompanyId, isAdmin, setActiveCompanyId]);
 
   useEffect(() => {
-    if (status !== 'ready' && status !== 'complete') return;
+    if (status !== 'checking' && status !== 'ready' && status !== 'complete') return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const context = canvas.getContext('2d');
@@ -143,9 +143,10 @@ export function CompanyFirstAccessOnboarding() {
     return answers[currentStep.key as Exclude<StepKey, 'adChannels'>];
   }, [answers, currentStep.key]);
 
-  // Administradores não passam pelo onboarding. Para empresas, o overlay só
-  // desaparece após a API confirmar o salvamento; erro não libera o dashboard.
-  if (isAdmin || status === 'idle' || status === 'checking' || status === 'loading') return null;
+  // Administradores não passam pelo onboarding. Para empresas, o overlay aparece
+  // desde o primeiro render enquanto a API confirma o status; assim o dashboard
+  // nunca fica visível antes do formulário inicial.
+  if (isAdmin || status === 'idle') return null;
 
   function choose(option: string) {
     if (currentStep.key === 'adChannels') setAnswers((current) => ({ ...current, adChannels: [option] }));
