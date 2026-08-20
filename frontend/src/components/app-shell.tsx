@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { apiFetch } from "@/lib/api";
 import { ActivityFeedPanel } from "@/components/activity-feed-panel";
 import { AccountSwitcher } from "@/components/account-switcher";
 import { useAccount } from "@/lib/account-context";
@@ -115,7 +116,40 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [inviteMode, setInviteMode] = useState<'COMPANY' | 'MEMBER'>('MEMBER');
   const [collapsed, setCollapsed] = useState(false);
   const { activeCompanyId } = useAccount();
+  const [activeCompanyLogo, setActiveCompanyLogo] = useState<string | null>(null);
   const unread = isAdmin && !activeCompanyId ? activityFeed.filter((e) => e.kind === "violation" || e.kind === "auto_pause").length : 0;
+
+  useEffect(() => {
+    if (!activeCompanyId) {
+      setActiveCompanyLogo(null);
+      return;
+    }
+    let cancelled = false;
+    const cacheKey = `metrik:company-logo:${activeCompanyId}`;
+    let cachedLogo: string | null = null;
+    try {
+      cachedLogo = localStorage.getItem(cacheKey);
+      if (!cancelled) setActiveCompanyLogo(cachedLogo);
+    } catch {
+      /* cache opcional */
+    }
+    void apiFetch<{ data?: { logo_url?: string | null } }>("/company-profile")
+      .then(({ data }) => {
+        if (cancelled) return;
+        const logoUrl = data?.logo_url ?? null;
+        setActiveCompanyLogo(logoUrl);
+        try {
+          if (logoUrl) localStorage.setItem(cacheKey, logoUrl);
+          else localStorage.removeItem(cacheKey);
+        } catch {
+          /* cache opcional */
+        }
+      })
+      .catch(() => {
+        if (!cancelled && !cachedLogo) setActiveCompanyLogo(null);
+      });
+    return () => { cancelled = true; };
+  }, [activeCompanyId]);
 
   // Gate: sem sessão, manda pro login. Quando o Supabase não está configurado
   // deixamos o app abrir (modo demo) para não travar o desenvolvimento.
@@ -282,10 +316,10 @@ export function AppShell({ children }: { children: ReactNode }) {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
-                className="size-8 rounded-full bg-foreground text-background flex items-center justify-center text-xs font-semibold hover:opacity-90 transition-opacity"
+                className="size-8 overflow-hidden rounded-full bg-foreground text-background flex items-center justify-center text-xs font-semibold hover:opacity-90 transition-opacity"
                 aria-label="Menu da conta"
               >
-                {initialsFrom(user?.user_metadata?.name as string | undefined, user?.email ?? null)}
+                {activeCompanyLogo ? <img src={activeCompanyLogo} alt="Logo da empresa ativa" className="size-full object-contain bg-white" /> : initialsFrom(user?.user_metadata?.name as string | undefined, user?.email ?? null)}
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
