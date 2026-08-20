@@ -54,7 +54,7 @@ const NOT_CONFIGURED =
 
 // Allowlist PÚBLICA de admins — usada apenas para mostrar/esconder a UI de
 // convite. A segurança real é o `requireAdmin` no backend (INVITE_ADMINS).
-const ADMIN_EMAILS = ((import.meta.env.VITE_INVITE_ADMINS as string | undefined) ?? "comercial.metri.ai@gmail.com")
+const ADMIN_EMAILS = ((import.meta.env.VITE_INVITE_ADMINS as string | undefined) ?? "comercial.metrik.ai@gmail.com")
   .split(",")
   .map((e) => e.trim().toLowerCase())
   .filter(Boolean);

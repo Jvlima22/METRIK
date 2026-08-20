@@ -3,7 +3,7 @@
 **Company:** TGL Solutions
 **Website:** www.tglsolutions.com.br
 **Manager account (MCC) ID:** 864-652-2223
-**API contact:** comercial.metri.ai@gmail.com
+**API contact:** comercial.metrik.ai@gmail.com
 **Access model:** Internal / own-use (we operate only on our own Google Ads accounts)
 **Document date:** 10/06/2026
 
