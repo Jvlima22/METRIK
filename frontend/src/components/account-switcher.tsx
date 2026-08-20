@@ -35,7 +35,7 @@ const MOCK_COMPANIES: Company[] = [
  * Collapses to just the platform badge when the sidebar is collapsed.
  */
 export function AccountSwitcher({ collapsed }: { collapsed: boolean }) {
-  const { accounts, activeAccount, activeCompanyId, setActiveCompanyId, setActiveAccount } = useAccount();
+  const { accounts, allAccounts, activeAccount, activeCompanyId, setActiveCompanyId, setActiveAccount } = useAccount();
   const { isAdmin } = useAuth();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(activeCompanyId);
@@ -105,9 +105,9 @@ export function AccountSwitcher({ collapsed }: { collapsed: boolean }) {
           {isAdmin && companies.length > 0 && <>
             <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">Empresas clientes</DropdownMenuLabel>
             <div className="space-y-1 px-1 pb-2">
-              {companies.filter((company) => !selectedCompanyId || company.id === selectedCompanyId).map((company) => {
+              {companies.map((company) => {
                 const selected = selectedCompanyId === company.id;
-                const companyAccounts = accounts.filter((account) => account.companyId === company.id);
+                const companyAccounts = allAccounts.filter((account) => account.companyId === company.id);
                 const hasConnectedAccount = companyAccounts.length > 0;
                 return <div key={company.id} onClick={() => chooseCompany(company.id)} role="button" tabIndex={0} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') chooseCompany(company.id); }} className={cn('cursor-pointer rounded-lg border p-2', selected ? 'border-violet/40 bg-violet/5' : 'border-border')}>
                   <div className="flex items-center gap-2">{company.logo_url ? <img src={company.logo_url} alt={`Logo da ${company.name}`} className="size-7 shrink-0 rounded-md object-contain" /> : <PlatformBadge platform="GOOGLE_ADS" className="size-7 shrink-0 text-[10px]" />}<div className="min-w-0 flex-1"><p className="truncate text-xs font-semibold">{company.name}</p><p className="truncate text-[10px] text-muted-foreground">{company.document || 'CNPJ pendente'} · {company.status}</p></div>{!hasConnectedAccount && <button type="button" className="rounded-md px-1.5 py-1 text-[10px] font-medium text-violet hover:bg-violet/10" onClick={(event) => { event.stopPropagation(); chooseCompany(company.id); setAddOpen(true); }}>Adicionar</button>}<button type="button" className="rounded-md px-1.5 py-1 text-[10px] font-medium text-muted-foreground hover:bg-accent" onClick={(event) => { event.stopPropagation(); chooseCompany(company.id); setManageOpen(true); }}>Gerenciar</button></div>
@@ -116,14 +116,20 @@ export function AccountSwitcher({ collapsed }: { collapsed: boolean }) {
             </div>
             <DropdownMenuSeparator />
           </>}
-          {accounts.length === 0 && (
+          {isAdmin && !selectedCompanyId && (
+            <div className="mx-1 mb-2 rounded-lg border border-dashed border-border p-3 text-center">
+              <p className="text-xs font-medium">Selecione uma empresa</p>
+              <p className="mt-1 text-[10px] text-muted-foreground">Escolha uma empresa cliente acima para ver suas contas Google Ads e Meta Ads.</p>
+            </div>
+          )}
+          {!isAdmin && accounts.length === 0 && (
             <div className="mx-1 mb-2 rounded-lg border border-dashed border-border p-3 text-center">
               <p className="text-xs font-medium">Nenhuma conta conectada</p>
               <p className="mt-1 text-[10px] text-muted-foreground">Adicione uma conta Google Ads ou Meta Ads para começar a importar métricas.</p>
             </div>
           )}
           {PLATFORM_ORDER.map((p) => {
-            const group = accounts.filter((a) => a.platform === p);
+            const group = (isAdmin ? (selectedCompanyId ? accounts : []) : accounts).filter((a) => a.platform === p);
             if (!group.length) return null;
             return (
               <DropdownMenuGroup key={p}>

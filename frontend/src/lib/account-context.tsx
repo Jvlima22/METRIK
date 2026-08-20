@@ -24,6 +24,7 @@ type AddAccountInput = {
 
 type AccountContextValue = {
   accounts: AdAccount[];
+  allAccounts: AdAccount[];
   activeAccount: AdAccount;
   activeCompanyId: string | null;
   setActiveCompanyId: (id: string | null) => void;
@@ -206,7 +207,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     if (id === activeId) setActiveId(EMPTY_ACCOUNT.id);
   }
 
-  return <AccountContext.Provider value={{ accounts, activeAccount, activeCompanyId, setActiveCompanyId, setActiveAccount, addAccount, updateAccount, removeAccount }}>{children}</AccountContext.Provider>;
+  return <AccountContext.Provider value={{ accounts, allAccounts, activeAccount, activeCompanyId, setActiveCompanyId, setActiveAccount, addAccount, updateAccount, removeAccount }}>{children}</AccountContext.Provider>;
 }
 
 export function useAccount(): AccountContextValue {
