@@ -38,6 +38,7 @@ import {
 import { InviteUserDialog } from "@/components/invite-user-dialog";
 import { activityFeed } from "@/lib/activity";
 import { useAuth } from "@/lib/auth-context";
+import { toast } from "sonner";
 
 function initialsFrom(name: string | undefined, email: string | null): string {
   const source = name?.trim() || email?.split("@")[0] || "";
@@ -301,13 +302,19 @@ export function AppShell({ children }: { children: ReactNode }) {
                   Convidar empresa
                 </DropdownMenuItem>
               )}
-              {activeCompanyId && (
+              {(isAdmin || activeCompanyId) && (
                 <>
                   <DropdownMenuItem onClick={() => { setInviteMode('MEMBER'); setInviteOpen(true); }}>
                     <UserPlus className="size-4" />
                     Convidar membro
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate({ to: "/company-settings" })}>
+                  <DropdownMenuItem onClick={() => {
+                    if (!activeCompanyId) {
+                      toast.info('Selecione uma empresa', { description: 'Escolha uma empresa no seletor lateral para abrir suas configurações.' });
+                      return;
+                    }
+                    navigate({ to: "/company-settings" });
+                  }}>
                     <Settings2 className="size-4" />
                     Configurações
                   </DropdownMenuItem>
