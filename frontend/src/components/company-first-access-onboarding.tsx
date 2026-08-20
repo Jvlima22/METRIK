@@ -49,7 +49,7 @@ function rememberOnboardingCompletion(companyId: string | null | undefined): voi
 export function CompanyFirstAccessOnboarding() {
   const { isAdmin } = useAuth();
   const { activeCompanyId, setActiveCompanyId } = useAccount();
-  const [status, setStatus] = useState<'idle' | 'loading' | 'ready' | 'complete' | 'error'>(() => hasLocalOnboardingCompletion(activeCompanyId) ? 'idle' : 'loading');
+  const [status, setStatus] = useState<'idle' | 'checking' | 'loading' | 'ready' | 'complete' | 'error'>(() => hasLocalOnboardingCompletion(activeCompanyId) ? 'idle' : 'checking');
   const [stepIndex, setStepIndex] = useState(0);
   const [answers, setAnswers] = useState<Answers>(emptyAnswers);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -64,7 +64,7 @@ export function CompanyFirstAccessOnboarding() {
       setStatus('idle');
       return () => { cancelled = true; };
     }
-    setStatus('loading');
+    setStatus('checking');
     apiFetch<{ data: { eligible: boolean; profile: { company_id?: string; answers?: Answers; primary_goal?: string; ad_channels?: string[]; conversion_event?: string; management_model?: string } | null } }>('/company-onboarding/status')
       .then(({ data }) => {
         if (cancelled) return;
@@ -88,7 +88,7 @@ export function CompanyFirstAccessOnboarding() {
   }, [activeCompanyId, isAdmin, setActiveCompanyId]);
 
   useEffect(() => {
-    if (status !== 'loading' && status !== 'ready' && status !== 'complete') return;
+    if (status !== 'ready' && status !== 'complete') return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const context = canvas.getContext('2d');
@@ -145,7 +145,7 @@ export function CompanyFirstAccessOnboarding() {
 
   // Administradores não passam pelo onboarding. Para empresas, o overlay só
   // desaparece após a API confirmar o salvamento; erro não libera o dashboard.
-  if (isAdmin || status === 'idle') return null;
+  if (isAdmin || status === 'idle' || status === 'checking' || status === 'loading') return null;
 
   function choose(option: string) {
     if (currentStep.key === 'adChannels') setAnswers((current) => ({ ...current, adChannels: [option] }));

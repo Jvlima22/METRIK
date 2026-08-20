@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useAuth } from "./auth-context";
+import { apiFetch } from "./api";
 import { initialAccounts, type AccountPlatform, type AdAccount } from "./accounts";
 
 export const EMPTY_ACCOUNT: AdAccount = {
@@ -52,33 +53,61 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    try {
-      const storedList = localStorage.getItem(listKey);
-      const parsed = storedList ? JSON.parse(storedList) as AdAccount[] : [];
-      const saved = Array.isArray(parsed) ? parsed : [];
-      const nextAccounts = isAdmin
-        ? [
-            // As contas demo pertencem exclusivamente ao Global Admin. O seed
-            // também restaura o `brandKey` caso uma versão antiga tenha sido
-            // persistida no navegador sem essa marcação.
-            ...initialAccounts.map((seed) => {
-              const savedAccount = saved.find((account) => account.id === seed.id);
-              return savedAccount ? { ...seed, ...savedAccount, brandKey: seed.brandKey } : seed;
-            }),
-            ...saved.filter((account) => !initialAccounts.some((seed) => seed.id === account.id)),
-          ]
-        : saved.filter((account) => Boolean(account.companyId));
-      setAllAccounts(nextAccounts);
-      setActiveId(localStorage.getItem(activeKey) ?? EMPTY_ACCOUNT.id);
-      const storedCompanyId = isAdmin ? null : localStorage.getItem(companyKey);
-      const inferredCompanyId = isAdmin ? null : nextAccounts.find((account) => account.companyId)?.companyId ?? null;
-      if (isAdmin) localStorage.removeItem(companyKey);
-      setActiveCompanyIdState(storedCompanyId ?? inferredCompanyId);
-    } catch {
-      setAllAccounts(isAdmin ? initialAccounts : []);
-      setActiveId(EMPTY_ACCOUNT.id);
-      setActiveCompanyIdState(null);
-    }
+    let cancelled = false;
+    const hydrate = async () => {
+      let nextAccounts: AdAccount[] = [];
+      let storedCompanyId: string | null = null;
+      let inferredCompanyId: string | null = null;
+      try {
+        const storedList = localStorage.getItem(listKey);
+        const parsed = storedList ? JSON.parse(storedList) as AdAccount[] : [];
+        const saved = Array.isArray(parsed) ? parsed : [];
+        nextAccounts = isAdmin
+          ? [
+              // As contas demo pertencem exclusivamente ao Global Admin. O seed
+              // também restaura o `brandKey` caso uma versão antiga tenha sido
+              // persistida no navegador sem essa marcação.
+              ...initialAccounts.map((seed) => {
+                const savedAccount = saved.find((account) => account.id === seed.id);
+                return savedAccount ? { ...seed, ...savedAccount, brandKey: seed.brandKey } : seed;
+              }),
+              ...saved.filter((account) => !initialAccounts.some((seed) => seed.id === account.id)),
+            ]
+          : saved.filter((account) => Boolean(account.companyId));
+        storedCompanyId = isAdmin ? null : localStorage.getItem(companyKey);
+        inferredCompanyId = isAdmin ? null : nextAccounts.find((account) => account.companyId)?.companyId ?? null;
+        if (isAdmin) localStorage.removeItem(companyKey);
+        if (!cancelled) {
+          setAllAccounts(nextAccounts);
+          setActiveId(localStorage.getItem(activeKey) ?? EMPTY_ACCOUNT.id);
+          setActiveCompanyIdState(storedCompanyId ?? inferredCompanyId);
+        }
+      } catch {
+        if (!cancelled) {
+          setAllAccounts(isAdmin ? initialAccounts : []);
+          setActiveId(EMPTY_ACCOUNT.id);
+          setActiveCompanyIdState(null);
+        }
+      }
+
+      // Usuários de empresa podem não ter contas de anúncios locais ainda.
+      // O backend resolve a única membership ativa e fornece o company_id real.
+      if (!isAdmin && !storedCompanyId && !inferredCompanyId) {
+        try {
+          const response = await apiFetch<{ data: { id?: string } }>('/company-profile');
+          const serverCompanyId = response.data?.id;
+          if (!cancelled && serverCompanyId) {
+            setActiveCompanyIdState(serverCompanyId);
+            localStorage.setItem(companyKey, serverCompanyId);
+          }
+        } catch {
+          // O middleware continuará protegendo o backend; mantemos a visão vazia até o contexto ser resolvido.
+        }
+      }
+    };
+
+    void hydrate();
+    return () => { cancelled = true; };
   }, [authLoading, user?.id, isAdmin, listKey, activeKey, companyKey]);
 
   useEffect(() => {
