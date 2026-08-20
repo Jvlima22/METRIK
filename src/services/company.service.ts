@@ -10,6 +10,23 @@ function slugify(value: string): string {
   return slug || `empresa-${Date.now()}`;
 }
 
+export async function ensureAdminCompany(adminUserId: string) {
+  const supabase = getSupabaseAdmin();
+  const slug = `metrik-admin-${adminUserId}`;
+  const { data: membership } = await supabase.from('company_members').select('company_id, company:companies!inner(id,name,slug,status)').eq('user_id', adminUserId).eq('role', 'COMPANY_ADMIN').eq('status', 'ACTIVE').eq('company.slug', slug).maybeSingle();
+  if (membership?.company_id) return Array.isArray(membership.company) ? membership.company[0] : membership.company;
+  let { data: company } = await supabase.from('companies').select('id,name,slug,document,status,timezone').eq('slug', slug).eq('status', 'ACTIVE').maybeSingle();
+  if (!company) {
+    const created = await supabase.from('companies').insert({ name: 'Metrik Admin', slug, timezone: 'America/Sao_Paulo', created_by: adminUserId }).select('id,name,slug,document,status,timezone').single();
+    if (created.error && !String(created.error.message).toLowerCase().includes('duplicate')) throw new AppError(`Não foi possível criar a empresa administrativa: ${created.error.message}`, 500);
+    company = created.data ?? (await supabase.from('companies').select('id,name,slug,document,status,timezone').eq('slug', slug).eq('status', 'ACTIVE').single()).data;
+  }
+  if (!company) throw new AppError('Não foi possível resolver a empresa administrativa', 500);
+  const { error: memberError } = await supabase.from('company_members').upsert({ company_id: company.id, user_id: adminUserId, role: 'COMPANY_ADMIN', status: 'ACTIVE' }, { onConflict: 'company_id,user_id' });
+  if (memberError) throw new AppError(`Não foi possível vincular o administrador à empresa administrativa: ${memberError.message}`, 500);
+  return company;
+}
+
 export async function listCompanies() {
   const { data, error } = await getSupabaseAdmin().from('companies').select('id,name,slug,document,logo_path,status,timezone,created_at,updated_at').order('name');
   if (error) throw new AppError(`Não foi possível listar empresas: ${error.message}`, 500);

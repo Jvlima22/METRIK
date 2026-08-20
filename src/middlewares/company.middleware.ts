@@ -3,6 +3,7 @@ import { getSupabaseAdmin } from '../lib/supabase';
 import { env } from '../config/env';
 import { AppError } from '../utils/AppError';
 import type { CompanyRole } from '../types/express';
+import { ensureAdminCompany } from '../services/company.service';
 
 function currentUser(req: Request) {
   if (!req.user?.id) throw new AppError('Usuário autenticado não identificado', 401);
@@ -28,6 +29,12 @@ export async function requireCompanyContext(req: Request, _res: Response, next: 
     const user = currentUser(req);
     const requestedCompanyId = typeof req.headers['x-company-id'] === 'string' ? req.headers['x-company-id'] : undefined;
     const admin = isGlobalAdmin(user.email);
+    if (admin && !requestedCompanyId) {
+      const company = await ensureAdminCompany(user.id);
+      req.company = { id: company.id, name: company.name, slug: company.slug, role: 'GLOBAL_ADMIN', isGlobalAdmin: true };
+      next();
+      return;
+    }
     const membershipQuery = getSupabaseAdmin()
       .from('company_members')
       .select('role, company:companies!inner(id,name,slug,status)')

@@ -66,6 +66,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         const storedList = localStorage.getItem(listKey);
         const parsed = storedList ? JSON.parse(storedList) as AdAccount[] : [];
         const saved = Array.isArray(parsed) ? parsed : [];
+        const adminProfile = isAdmin ? await apiFetch<{ data: { id?: string } }>('/company-profile') : null;
         const serverAccounts: AdAccount[] = isAdmin
           ? ((await apiFetch<{ data: Array<{ id: string; company_id: string; platform: AccountPlatform; external_account_id: string; name: string; status: string; company_name?: string }> }>('/integrations/admin/accounts')).data ?? []).map((account) => ({
               id: `server-${account.id}`,
@@ -93,9 +94,9 @@ export function AccountProvider({ children }: { children: ReactNode }) {
               ...uniqueAccounts.filter((account) => !initialAccounts.some((seed) => seed.id === account.id)),
             ]
           : saved.filter((account) => Boolean(account.companyId));
-        storedCompanyId = isAdmin ? null : localStorage.getItem(companyKey);
-        inferredCompanyId = isAdmin ? null : nextAccounts.find((account) => account.companyId)?.companyId ?? null;
-        if (isAdmin) localStorage.removeItem(companyKey);
+        storedCompanyId = isAdmin ? (localStorage.getItem(companyKey) ?? adminProfile?.data?.id ?? null) : localStorage.getItem(companyKey);
+        inferredCompanyId = isAdmin ? adminProfile?.data?.id ?? null : nextAccounts.find((account) => account.companyId)?.companyId ?? null;
+        if (isAdmin && storedCompanyId) localStorage.setItem(companyKey, storedCompanyId);
         if (!cancelled) {
           setAllAccounts(nextAccounts);
           setActiveId(localStorage.getItem(activeKey) ?? EMPTY_ACCOUNT.id);
