@@ -196,7 +196,7 @@ function DashboardPage() {
   // numbers (pure mock — no real API call).
   const { activeAccount, activeCompanyId } = useAccount();
   const { isAdmin } = useAuth();
-  const showAdminDemo = isAdmin && !activeCompanyId && activeAccount.id !== EMPTY_ACCOUNT.id && Boolean(activeAccount.brandKey);
+  const showAdminDemo = isAdmin && activeAccount.companyId?.startsWith('mock-') === true && activeAccount.id !== EMPTY_ACCOUNT.id && Boolean(activeAccount.brandKey);
   const performanceCardRef = useRef<HTMLDivElement>(null);
   const [exportingPerformance, setExportingPerformance] = useState(false);
   useEffect(() => {

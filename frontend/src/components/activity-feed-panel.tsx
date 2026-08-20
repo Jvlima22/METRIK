@@ -16,8 +16,8 @@ import { useAccount } from "@/lib/account-context";
  */
 export function ActivityFeedPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { isAdmin } = useAuth();
-  const { activeCompanyId } = useAccount();
-  const visibleFeed = isAdmin && !activeCompanyId ? activityFeed : [];
+  const { activeAccount } = useAccount();
+  const visibleFeed = isAdmin && activeAccount.companyId?.startsWith('mock-') === true ? activityFeed : [];
 
   return (
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>

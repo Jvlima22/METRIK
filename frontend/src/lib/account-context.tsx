@@ -39,6 +39,7 @@ const AccountContext = createContext<AccountContextValue | null>(null);
 export function AccountProvider({ children }: { children: ReactNode }) {
   const { user, isAdmin, loading: authLoading } = useAuth();
   const [allAccounts, setAllAccounts] = useState<AdAccount[]>([]);
+  const [adminCompanyId, setAdminCompanyId] = useState<string | null>(null);
   const [activeId, setActiveId] = useState<string>(EMPTY_ACCOUNT.id);
   const [activeCompanyId, setActiveCompanyIdState] = useState<string | null>(() => {
     if (typeof window === "undefined" || !user?.id || isAdmin) return null;
@@ -94,6 +95,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
               ...uniqueAccounts.filter((account) => !initialAccounts.some((seed) => seed.id === account.id)),
             ]
           : saved.filter((account) => Boolean(account.companyId));
+        if (isAdmin) setAdminCompanyId(adminProfile?.data?.id ?? null);
         storedCompanyId = isAdmin ? (localStorage.getItem(companyKey) ?? adminProfile?.data?.id ?? null) : localStorage.getItem(companyKey);
         inferredCompanyId = isAdmin ? adminProfile?.data?.id ?? null : nextAccounts.find((account) => account.companyId)?.companyId ?? null;
         if (isAdmin && storedCompanyId) localStorage.setItem(companyKey, storedCompanyId);
@@ -146,8 +148,11 @@ export function AccountProvider({ children }: { children: ReactNode }) {
 
   const accounts = useMemo(() => {
     if (!activeCompanyId) return allAccounts;
+    if (isAdmin && activeCompanyId === adminCompanyId) {
+      return allAccounts.filter((account) => account.companyId === activeCompanyId || account.companyId?.startsWith('mock-'));
+    }
     return allAccounts.filter((account) => account.companyId === activeCompanyId);
-  }, [allAccounts, activeCompanyId]);
+  }, [allAccounts, activeCompanyId, adminCompanyId, isAdmin]);
 
   const activeAccount = accounts.find((account) => account.id === activeId) ?? accounts[0] ?? EMPTY_ACCOUNT;
 

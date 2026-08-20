@@ -55,7 +55,7 @@ const statusBadge: Record<JobStatus["status"], { cls: string; icon: any; label: 
 function JobsPage() {
   const { activeAccount, activeCompanyId } = useAccount();
   const { isAdmin } = useAuth();
-  const showAdminDemo = isAdmin && !activeCompanyId && activeAccount.id !== EMPTY_ACCOUNT.id;
+  const showAdminDemo = isAdmin && activeAccount.companyId?.startsWith('mock-') === true && activeAccount.id !== EMPTY_ACCOUNT.id;
   const [jobId, setJobId] = useState("");
   const [result, setResult] = useState<JobStatus | null>(null);
   const [loading, setLoading] = useState(false);

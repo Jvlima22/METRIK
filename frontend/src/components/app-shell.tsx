@@ -115,9 +115,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteMode, setInviteMode] = useState<'COMPANY' | 'MEMBER'>('MEMBER');
   const [collapsed, setCollapsed] = useState(false);
-  const { activeCompanyId } = useAccount();
+  const { activeAccount, activeCompanyId } = useAccount();
   const [activeCompanyLogo, setActiveCompanyLogo] = useState<string | null>(null);
-  const unread = isAdmin && !activeCompanyId ? activityFeed.filter((e) => e.kind === "violation" || e.kind === "auto_pause").length : 0;
+  const unread = isAdmin && activeAccount.companyId?.startsWith('mock-') === true ? activityFeed.filter((e) => e.kind === "violation" || e.kind === "auto_pause").length : 0;
 
   useEffect(() => {
     if (!activeCompanyId) {
