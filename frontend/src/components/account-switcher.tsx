@@ -41,6 +41,7 @@ export function AccountSwitcher({ collapsed }: { collapsed: boolean }) {
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(activeCompanyId);
   const [addOpen, setAddOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
+  const [companyPickerOpen, setCompanyPickerOpen] = useState(true);
   const selectedCompany = companies.find((company) => company.id === activeCompanyId);
   const activeAccountCompany = companies.find((company) => company.id === activeAccount.companyId) ?? selectedCompany;
   const activeAccountLogo = activeAccount.logoUrl ?? activeAccountCompany?.logo_url;
@@ -104,7 +105,21 @@ export function AccountSwitcher({ collapsed }: { collapsed: boolean }) {
         <DropdownMenuContent align="start" sideOffset={6} className="w-80">
           {isAdmin && companies.length > 0 && <>
             <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">Empresas clientes</DropdownMenuLabel>
-            <div className="space-y-1 px-1 pb-2">
+            <button
+              type="button"
+              onClick={(event) => { event.preventDefault(); event.stopPropagation(); setCompanyPickerOpen((open) => !open); }}
+              className="mx-1 mb-2 flex w-[calc(100%-8px)] items-center gap-2.5 rounded-xl border border-border bg-white/70 px-2.5 py-2 text-left transition-colors hover:bg-accent"
+              aria-expanded={companyPickerOpen}
+              aria-label="Selecionar empresa cliente"
+            >
+              {selectedCompany?.logo_url ? <img src={selectedCompany.logo_url} alt={`Logo da ${selectedCompany.name}`} className="size-8 rounded-lg object-contain" /> : <PlatformBadge platform="GOOGLE_ADS" className="size-8 text-xs" />}
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-xs font-semibold">{selectedCompany?.name ?? "Selecionar empresa"}</span>
+                <span className="block truncate text-[10px] text-muted-foreground">{selectedCompany ? `${selectedCompany.document || "CNPJ pendente"} · ${selectedCompany.status}` : "Escolha uma empresa cliente"}</span>
+              </span>
+              <ChevronsUpDown className="size-3.5 shrink-0 text-muted-foreground" />
+            </button>
+            {companyPickerOpen && <div className="space-y-1 px-1 pb-2">
               {companies.map((company) => {
                 const selected = selectedCompanyId === company.id;
                 const companyAccounts = allAccounts.filter((account) => account.companyId === company.id);
@@ -113,7 +128,7 @@ export function AccountSwitcher({ collapsed }: { collapsed: boolean }) {
                   <div className="flex items-center gap-2">{company.logo_url ? <img src={company.logo_url} alt={`Logo da ${company.name}`} className="size-7 shrink-0 rounded-md object-contain" /> : <PlatformBadge platform="GOOGLE_ADS" className="size-7 shrink-0 text-[10px]" />}<div className="min-w-0 flex-1"><p className="truncate text-xs font-semibold">{company.name}</p><p className="truncate text-[10px] text-muted-foreground">{company.document || 'CNPJ pendente'} · {company.status}</p></div>{!hasConnectedAccount && <button type="button" className="rounded-md px-1.5 py-1 text-[10px] font-medium text-violet hover:bg-violet/10" onClick={(event) => { event.stopPropagation(); chooseCompany(company.id); setAddOpen(true); }}>Adicionar</button>}<button type="button" className="rounded-md px-1.5 py-1 text-[10px] font-medium text-muted-foreground hover:bg-accent" onClick={(event) => { event.stopPropagation(); chooseCompany(company.id); setManageOpen(true); }}>Gerenciar</button></div>
                 </div>;
               })}
-            </div>
+            </div>}
             <DropdownMenuSeparator />
           </>}
           {isAdmin && !selectedCompanyId && (
