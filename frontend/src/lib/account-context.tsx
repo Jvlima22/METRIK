@@ -161,7 +161,16 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  function setActiveAccount(id: string) { setActiveId(id); }
+  function setActiveAccount(id: string) {
+    const account = allAccounts.find((item) => item.id === id);
+    setActiveId(id);
+    if (account?.companyId) {
+      setActiveCompanyIdState(account.companyId);
+      if (user && typeof window !== 'undefined') {
+        try { window.localStorage.setItem(companyKey, account.companyId); } catch { /* armazenamento opcional */ }
+      }
+    }
+  }
 
   function addAccount(input: AddAccountInput): AdAccount {
     const acc: AdAccount = {
