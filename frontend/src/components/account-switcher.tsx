@@ -38,9 +38,23 @@ export function AccountSwitcher({ collapsed }: { collapsed: boolean }) {
   const activeAccountLogo = activeAccount.logoUrl ?? activeAccountCompany?.logo_url;
 
   useEffect(() => {
-    if (!isAdmin) return;
-    apiFetch<{ data: Company[] }>('/companies').then(({ data }) => setCompanies(data)).catch(() => setCompanies([]));
-  }, [isAdmin]);
+    let cancelled = false;
+    const loadCompanies = async () => {
+      try {
+        if (isAdmin) {
+          const { data } = await apiFetch<{ data: Company[] }>('/companies');
+          if (!cancelled) setCompanies(data);
+          return;
+        }
+        const { data } = await apiFetch<{ data: Company }>('/company-profile');
+        if (!cancelled) setCompanies(data?.id ? [data] : []);
+      } catch {
+        if (!cancelled) setCompanies([]);
+      }
+    };
+    void loadCompanies();
+    return () => { cancelled = true; };
+  }, [isAdmin, activeCompanyId]);
 
   useEffect(() => {
     setSelectedCompanyId(activeCompanyId);
