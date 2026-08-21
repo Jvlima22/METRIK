@@ -27,6 +27,7 @@ export function SettingsModalContent() {
   const [browserNotifications, setBrowserNotifications] = useState(() => readPreference("metrik:browser-notifications", "true") === "true");
   const [compactDensity, setCompactDensity] = useState(() => readPreference<string>("metrik:compact-density", "false") === "true");
   const [companyName, setCompanyName] = useState<string | null>(null);
+  const [completionPercentage, setCompletionPercentage] = useState<number | null>(null);
   const [notificationMessage, setNotificationMessage] = useState<string | null>(null);
   const { user, isAdmin } = useAuth();
   const { activeAccount, activeCompanyId } = useAccount();
@@ -62,9 +63,13 @@ export function SettingsModalContent() {
   useEffect(() => {
     let cancelled = false;
     setCompanyName(null);
-    void apiFetch<{ data: CompanySummary }>("/company-profile")
+    setCompletionPercentage(null);
+    void apiFetch<{ data: CompanySummary; completion?: { percentage?: number } }>("/company-profile")
       .then((response) => {
-        if (!cancelled) setCompanyName(response.data?.trade_name || response.data?.name || null);
+        if (!cancelled) {
+          setCompanyName(response.data?.trade_name || response.data?.name || null);
+          setCompletionPercentage(typeof response.completion?.percentage === "number" ? response.completion.percentage : null);
+        }
       })
       .catch(() => {
         // Para contas mock do admin, o fallback abaixo usa o companyName do seletor.
@@ -89,7 +94,7 @@ export function SettingsModalContent() {
       </aside>
 
       <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain bg-white">
-        <div className="border-b border-slate-200 px-5 py-5 sm:px-8"><p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-violet-600">{active.label}</p><h2 className="mt-1 text-xl font-semibold text-slate-900">{active.label}</h2><p className="mt-1 text-xs text-slate-500">{active.description}</p></div>
+        <div className="border-b border-slate-200 px-5 py-5 sm:px-8"><p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-violet-600">{active.label}</p><div className="mt-1 flex items-center gap-2"><h2 className="text-xl font-semibold text-slate-900">{active.label}</h2>{activeSection === "company" && completionPercentage !== null && <span className="inline-flex shrink-0 items-center rounded-full border border-violet-200 bg-violet-50 px-2 py-0.5 text-xs font-bold text-violet-700" title="Percentual de preenchimento do cadastro">{completionPercentage}%</span>}</div><p className="mt-1 text-xs text-slate-500">{active.description}</p></div>
 
         {activeSection === "general" && <div className="space-y-5 p-5 sm:p-8">
           <section className="rounded-2xl border border-slate-200 p-5"><h3 className="text-sm font-semibold text-slate-900">Preferências de experiência</h3><p className="mt-1 text-xs text-slate-500">Ajuste como você recebe informações e navega pela plataforma.</p><PreferenceRow label="Notificações do navegador" description="Receba avisos quando houver uma atualização importante." checked={browserNotifications} onChange={(value) => void handleBrowserNotifications(value)} />{notificationMessage && <p className="mt-3 text-[11px] text-slate-500">{notificationMessage}</p>}<PreferenceRow label="Densidade compacta" description="Use mais informações na mesma área da tela." checked={compactDensity} onChange={setCompactDensity} /></section>
