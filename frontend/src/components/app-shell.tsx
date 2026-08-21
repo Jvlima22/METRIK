@@ -338,10 +338,10 @@ export function AppShell({ children }: { children: ReactNode }) {
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => {
                     if (!activeCompanyId) {
-                      toast.info('Selecione uma empresa', { description: 'Escolha uma empresa no seletor lateral para abrir suas configurações.' });
+                      toast.info('Selecione uma empresa', { description: 'Escolha uma empresa no seletor para abrir suas configurações.' });
                       return;
                     }
-                    navigate({ to: "/company-settings" });
+                    setQuickAction("settings");
                   }}>
                     <Settings2 className="size-4" />
                     Configurações
