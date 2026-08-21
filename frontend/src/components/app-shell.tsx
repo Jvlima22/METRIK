@@ -21,7 +21,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { apiFetch } from "@/lib/api";
 import { ActivityFeedPanel } from "@/components/activity-feed-panel";
-import { ProfileNavigationSheet, ProfileSheetTrigger } from "@/components/profile-navigation-sheet";
+import { ProfileNavigationSheet } from "@/components/profile-navigation-sheet";
 
 import { AccountSwitcher } from "@/components/account-switcher";
 import { useAccount } from "@/lib/account-context";
@@ -114,7 +114,6 @@ export function AppShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const { user, loading, isAuthenticated, isConfigured, isAdmin, signOut } = useAuth();
     const [feedOpen, setFeedOpen] = useState(false);
-  const [profileSheetOpen, setProfileSheetOpen] = useState(false);
 
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteMode, setInviteMode] = useState<'COMPANY' | 'MEMBER'>('MEMBER');
@@ -252,15 +251,10 @@ export function AppShell({ children }: { children: ReactNode }) {
           ))}
         </nav>
 
-        <ProfileSheetTrigger
+        <ProfileNavigationSheet
           collapsed={collapsed}
-          onClick={() => setProfileSheetOpen(true)}
           displayName={activeAccount.companyName ?? activeAccount.name ?? user?.email?.split("@")[0] ?? "Minha conta"}
           avatarUrl={activeCompanyLogo ?? activeAccount.logoUrl}
-        />
-        <ProfileNavigationSheet
-          open={profileSheetOpen}
-          onOpenChange={setProfileSheetOpen}
           onInviteMember={isAdmin || Boolean(activeCompanyId) ? () => { setInviteMode('MEMBER'); setInviteOpen(true); } : undefined}
           onInviteCompany={isAdmin ? () => { setInviteMode('COMPANY'); setInviteOpen(true); } : undefined}
         />
