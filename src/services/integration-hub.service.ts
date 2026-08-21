@@ -2,6 +2,7 @@ import { randomBytes, createCipheriv, createDecipheriv } from "node:crypto";
 import { getSupabaseAdmin } from "../lib/supabase";
 import { env } from "../config/env";
 import { AppError } from "../utils/AppError";
+import { assertCompanyLimit } from './entitlement.service';
 
 export type AuthType = "API_KEY" | "OAUTH2" | "TOKEN" | "CUSTOM";
 export const integrationCatalog = [
@@ -96,6 +97,13 @@ export async function registerAdAccount(userId: string, companyId: string, input
   if (!externalAccountId || !name) throw new AppError('Nome e identificador da conta são obrigatórios', 400);
   const provider = input.platform === 'GOOGLE_ADS' ? 'google-ads' : 'meta-ads';
   const supabase = getSupabaseAdmin();
+  const { count: currentAdAccounts, error: usageError } = await supabase
+    .from('ad_platform_accounts')
+    .select('id', { count: 'exact', head: true })
+    .eq('company_id', companyId)
+    .eq('status', 'ACTIVE');
+  if (usageError) throw new AppError(`Não foi possível verificar o limite do plano: ${usageError.message}`, 500);
+  await assertCompanyLimit({ companyId, userEmail: null, resource: 'ad_accounts', current: currentAdAccounts ?? 0 });
   const { data: existingConnection, error: connectionError } = await supabase.from('integration_connections').select('id,credentials_ciphertext,credentials_iv,credentials_tag').eq('company_id', companyId).eq('provider', provider).maybeSingle();
   if (connectionError) throw new AppError(`Não foi possível localizar a conexão: ${connectionError.message}`, 500);
   if (!existingConnection) throw new AppError(`Não é possível adicionar esta conta sem uma autorização OAuth válida do ${input.platform === 'GOOGLE_ADS' ? 'Google Ads' : 'Meta Ads'}.`, 401);

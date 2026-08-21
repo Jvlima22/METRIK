@@ -1,7 +1,9 @@
 import type { Request, Response } from 'express';
 import { env } from '../config/env';
 import { getSupabaseAdmin } from '../lib/supabase';
+import { isGlobalAdmin } from '../middlewares/company.middleware';
 import { CaktoApiError, listCaktoBillingCycles, listCaktoSubscriptions } from '../services/cakto.service';
+import { getCompanyEntitlements } from '../services/entitlement.service';
 
 type RecordValue = Record<string, unknown>;
 
@@ -73,6 +75,20 @@ function sanitizeCycles(value: unknown): RecordValue[] {
     status: text(cycle.status) ?? 'unknown',
     completedAt: text(cycle.completed_at),
   }));
+}
+
+export async function getBillingEntitlements(req: Request, res: Response): Promise<void> {
+  try {
+    const result = await getCompanyEntitlements({
+      companyId: req.company?.id ?? null,
+      userEmail: req.user?.email ?? null,
+      isGlobalAdmin: isGlobalAdmin(req.user?.email),
+    });
+    res.json(result);
+  } catch (error) {
+    console.error('[billing] entitlements lookup failed', error);
+    res.status(503).json({ message: 'Não foi possível calcular os limites do plano.' });
+  }
 }
 
 export async function getBillingSubscription(req: Request, res: Response): Promise<void> {

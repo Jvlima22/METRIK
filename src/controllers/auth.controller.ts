@@ -3,6 +3,8 @@ import { AppError } from '../utils/AppError';
 import { inviteToCompany } from '../services/company.service';
 import { createCompanySignupInvite } from '../services/company-signup.service';
 import { isGlobalAdmin } from '../middlewares/company.middleware';
+import { getSupabaseAdmin } from '../lib/supabase';
+import { assertCompanyLimit } from '../services/entitlement.service';
 
 /**
  * POST /auth/invite — endpoint único usado pelo popup de convite.
@@ -21,6 +23,13 @@ export async function inviteUser(req: Request, res: Response, next: NextFunction
 
     if (inviteKind === 'MEMBER') {
       if (!companyId) throw new AppError('Selecione uma empresa ativa para convidar um membro', 400);
+      const { count: currentMembers, error: memberUsageError } = await getSupabaseAdmin()
+        .from('company_members')
+        .select('id', { count: 'exact', head: true })
+        .eq('company_id', companyId)
+        .in('status', ['ACTIVE', 'PENDING', 'INVITED']);
+      if (memberUsageError) throw new AppError(`Não foi possível verificar o limite de membros: ${memberUsageError.message}`, 500);
+      await assertCompanyLimit({ companyId, userEmail: req.user?.email ?? null, resource: 'team_members', current: currentMembers ?? 0, isGlobalAdmin: isGlobalAdmin(req.user?.email) });
       const invite = await inviteToCompany(companyId, normalizedEmail, 'COMPANY_OPERATOR', userId);
       res.status(201).json({ status: 'ok', type: 'MEMBER', invited: normalizedEmail, invitationId: invite.id, by: req.user?.email });
       return;
