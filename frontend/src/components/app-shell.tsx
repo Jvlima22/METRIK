@@ -51,7 +51,7 @@ function initialsFrom(name: string | undefined, email: string | null): string {
   return (parts[0][0] + (parts[1]?.[0] ?? "")).toUpperCase();
 }
 
-type NavItem = { to: LinkProps["to"]; label: string; icon: LucideIcon; adminOnly?: boolean };
+type NavItem = { to: LinkProps["to"]; label: string; icon: LucideIcon; adminOnly?: boolean; action?: "settings" };
 
 const navSections: { group: string; items: NavItem[] }[] = [
   {
@@ -74,7 +74,7 @@ const navSections: { group: string; items: NavItem[] }[] = [
     group: "Conta",
     items: [
       { to: "/subscriptions", label: "Assinaturas", icon: CreditCard },
-      { to: "/company-settings", label: "Configuração", icon: Settings2 },
+      { to: "/company-settings", label: "Configuração", icon: Settings2, action: "settings" },
     ],
   },
 ];
@@ -83,31 +83,16 @@ const navItems: NavItem[] = navSections.flatMap((s) => s.items);
 
 const SIDEBAR_KEY = "fury:sidebar";
 
-function NavLink({ item, active, collapsed }: { item: NavItem; active: boolean; collapsed: boolean }) {
-  const link = (
-    <Link
-      to={item.to}
-      className={cn(
-        "flex items-center rounded-lg text-sm transition-colors",
-        collapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2",
-        active
-          ? "bg-foreground text-background"
-          : "text-foreground/70 hover:bg-accent hover:text-foreground",
-      )}
-      aria-label={item.label}
-    >
-      <item.icon className="size-4 shrink-0" />
-      {!collapsed && <span>{item.label}</span>}
-    </Link>
+function NavLink({ item, active, collapsed, onAction }: { item: NavItem; active: boolean; collapsed: boolean; onAction?: (action: "settings") => void }) {
+  const content = <><item.icon className="size-4 shrink-0" />{!collapsed && <span>{item.label}</span>}</>;
+  const className = cn(
+    "flex items-center rounded-lg text-sm transition-colors",
+    collapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2",
+    active ? "bg-foreground text-background" : "text-foreground/70 hover:bg-accent hover:text-foreground",
   );
-
-  if (!collapsed) return link;
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>{link}</TooltipTrigger>
-      <TooltipContent side="right">{item.label}</TooltipContent>
-    </Tooltip>
-  );
+  const control = item.action ? <button type="button" onClick={() => onAction?.(item.action!)} className={className} aria-label={item.label}>{content}</button> : <Link to={item.to} className={className} aria-label={item.label}>{content}</Link>;
+  if (!collapsed) return control;
+  return <Tooltip><TooltipTrigger asChild>{control}</TooltipTrigger><TooltipContent side="right">{item.label}</TooltipContent></Tooltip>;
 }
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -245,7 +230,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <ul className="flex flex-col gap-0.5">
                 {section.items.filter((item) => !item.adminOnly || isAdmin).map((item) => (
                   <li key={item.to}>
-                    <NavLink item={item} active={pathname.startsWith(item.to ?? "")} collapsed={collapsed} />
+                    <NavLink item={item} active={pathname.startsWith(item.to ?? "")} collapsed={collapsed} onAction={(action) => { if (action === "settings") setQuickAction("settings"); }} />
                   </li>
                 ))}
               </ul>
