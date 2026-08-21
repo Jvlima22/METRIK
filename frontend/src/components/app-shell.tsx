@@ -51,7 +51,7 @@ function initialsFrom(name: string | undefined, email: string | null): string {
   return (parts[0][0] + (parts[1]?.[0] ?? "")).toUpperCase();
 }
 
-type NavItem = { to: LinkProps["to"]; label: string; icon: LucideIcon; adminOnly?: boolean; action?: "settings" };
+type NavItem = { to: LinkProps["to"]; label: string; icon: LucideIcon; adminOnly?: boolean; action?: "settings" | "subscription" };
 
 const navSections: { group: string; items: NavItem[] }[] = [
   {
@@ -73,7 +73,7 @@ const navSections: { group: string; items: NavItem[] }[] = [
   {
     group: "Conta",
     items: [
-      { to: "/subscriptions", label: "Assinaturas", icon: CreditCard },
+      { to: "/subscriptions", label: "Assinaturas", icon: CreditCard, action: "subscription" },
     ],
   },
 ];
@@ -82,7 +82,7 @@ const navItems: NavItem[] = navSections.flatMap((s) => s.items);
 
 const SIDEBAR_KEY = "fury:sidebar";
 
-function NavLink({ item, active, collapsed, onAction }: { item: NavItem; active: boolean; collapsed: boolean; onAction?: (action: "settings") => void }) {
+function NavLink({ item, active, collapsed, onAction }: { item: NavItem; active: boolean; collapsed: boolean; onAction?: (action: "settings" | "subscription") => void }) {
   const content = <><item.icon className="size-4 shrink-0" />{!collapsed && <span>{item.label}</span>}</>;
   const className = cn(
     "flex items-center rounded-lg text-sm transition-colors",
@@ -229,7 +229,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <ul className="flex flex-col gap-0.5">
                 {section.items.filter((item) => !item.adminOnly || isAdmin).map((item) => (
                   <li key={item.to}>
-                    <NavLink item={item} active={pathname.startsWith(item.to ?? "")} collapsed={collapsed} onAction={(action) => { if (action === "settings") setQuickAction("settings"); }} />
+                    <NavLink item={item} active={pathname.startsWith(item.to ?? "")} collapsed={collapsed} onAction={(action) => setQuickAction(action)} />
                   </li>
                 ))}
               </ul>
