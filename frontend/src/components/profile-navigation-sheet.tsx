@@ -6,6 +6,7 @@ import {
   FileText,
   HelpCircle,
   LogOut,
+  Network,
   Settings2,
   ShieldCheck,
   UserPlus,
@@ -85,6 +86,7 @@ export function ProfileNavigationSheet({ collapsed, displayName, avatarUrl, onIn
         <DropdownMenuSeparator />
         <MenuRow icon={UserRound} onSelect={() => onOpenModal ? onOpenModal("account") : go("/company-settings")}>Conta</MenuRow>
         <MenuRow icon={Settings2} onSelect={() => onOpenModal ? onOpenModal("settings") : go("/company-settings")}>Configurações</MenuRow>
+        <MenuRow icon={Network} onSelect={() => onOpenModal ? onOpenModal("hub") : go("/hub")}>Hub de integrações</MenuRow>
 
         {(onInviteMember || onInviteCompany) && <>
           <DropdownMenuSeparator />
