@@ -23,6 +23,7 @@ import { useAccount } from "@/lib/account-context";
 import { useAuth } from "@/lib/auth-context";
 import { usePlan } from "@/lib/plan-context";
 import { cn } from "@/lib/utils";
+import type { QuickActionKind } from "@/components/quick-action-modal";
 
 type ProfileNavigationDropdownProps = {
   collapsed: boolean;
@@ -30,6 +31,7 @@ type ProfileNavigationDropdownProps = {
   avatarUrl?: string | null;
   onInviteMember?: () => void;
   onInviteCompany?: () => void;
+  onOpenModal?: (kind: QuickActionKind) => void;
 };
 
 function MenuRow({ icon: Icon, children, onSelect, destructive = false }: { icon: typeof UserRound; children: ReactNode; onSelect: () => void; destructive?: boolean }) {
@@ -41,7 +43,7 @@ function MenuRow({ icon: Icon, children, onSelect, destructive = false }: { icon
   );
 }
 
-export function ProfileNavigationSheet({ collapsed, displayName, avatarUrl, onInviteMember, onInviteCompany }: ProfileNavigationDropdownProps) {
+export function ProfileNavigationSheet({ collapsed, displayName, avatarUrl, onInviteMember, onInviteCompany, onOpenModal }: ProfileNavigationDropdownProps) {
   const navigate = useNavigate();
   const { user, isAdmin, signOut } = useAuth();
   const { activeCompanyId } = useAccount();
@@ -77,12 +79,12 @@ export function ProfileNavigationSheet({ collapsed, displayName, avatarUrl, onIn
             <span className="block text-xs font-semibold text-foreground">{planLabel}</span>
             <span className="block text-[10px] text-muted-foreground">Assinatura Metrik</span>
           </span>
-          <button type="button" onClick={() => go("/subscriptions")} className="rounded-md bg-foreground px-2 py-1 text-[10px] font-semibold text-background hover:opacity-90">{currentPlan ? "Gerenciar" : "Escolher"}</button>
+          <button type="button" onClick={() => onOpenModal ? onOpenModal("subscription") : go("/subscriptions")} className="rounded-md bg-foreground px-2 py-1 text-[10px] font-semibold text-background hover:opacity-90">{currentPlan ? "Gerenciar" : "Escolher"}</button>
         </div>
 
         <DropdownMenuSeparator />
-        <MenuRow icon={UserRound} onSelect={() => go("/company-settings")}>Conta</MenuRow>
-        <MenuRow icon={Settings2} onSelect={() => go("/company-settings")}>Configurações</MenuRow>
+        <MenuRow icon={UserRound} onSelect={() => onOpenModal ? onOpenModal("account") : go("/company-settings")}>Conta</MenuRow>
+        <MenuRow icon={Settings2} onSelect={() => onOpenModal ? onOpenModal("settings") : go("/company-settings")}>Configurações</MenuRow>
 
         {(onInviteMember || onInviteCompany) && <>
           <DropdownMenuSeparator />
@@ -91,11 +93,11 @@ export function ProfileNavigationSheet({ collapsed, displayName, avatarUrl, onIn
         </>}
 
         <DropdownMenuSeparator />
-        <MenuRow icon={ShieldCheck} onSelect={() => go("/violations")}>Compliance</MenuRow>
+        <MenuRow icon={ShieldCheck} onSelect={() => go("/compliance")}>Compliance</MenuRow>
 
         <DropdownMenuSeparator />
-        <MenuRow icon={HelpCircle} onSelect={() => go("/dashboard")}>Obter ajuda</MenuRow>
-        <MenuRow icon={FileText} onSelect={() => go("/dashboard")}>Documentos</MenuRow>
+        <MenuRow icon={HelpCircle} onSelect={() => go("/help")}>Obter ajuda</MenuRow>
+        <MenuRow icon={FileText} onSelect={() => go("/documents")}>Documentos</MenuRow>
         <MenuRow icon={LogOut} onSelect={() => void signOut()} destructive>Sair</MenuRow>
       </DropdownMenuContent>
     </DropdownMenu>

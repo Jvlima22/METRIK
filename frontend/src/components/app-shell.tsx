@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 import { apiFetch } from "@/lib/api";
 import { ActivityFeedPanel } from "@/components/activity-feed-panel";
 import { ProfileNavigationSheet } from "@/components/profile-navigation-sheet";
+import { QuickActionModal, type QuickActionKind } from "@/components/quick-action-modal";
 
 import { AccountSwitcher } from "@/components/account-switcher";
 import { useAccount } from "@/lib/account-context";
@@ -114,6 +115,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const { user, loading, isAuthenticated, isConfigured, isAdmin, signOut } = useAuth();
     const [feedOpen, setFeedOpen] = useState(false);
+  const [quickAction, setQuickAction] = useState<QuickActionKind | null>(null);
 
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteMode, setInviteMode] = useState<'COMPANY' | 'MEMBER'>('MEMBER');
@@ -257,6 +259,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           avatarUrl={activeCompanyLogo ?? activeAccount.logoUrl}
           onInviteMember={isAdmin || Boolean(activeCompanyId) ? () => { setInviteMode('MEMBER'); setInviteOpen(true); } : undefined}
           onInviteCompany={isAdmin ? () => { setInviteMode('COMPANY'); setInviteOpen(true); } : undefined}
+          onOpenModal={setQuickAction}
         />
 
         {/* Collapse toggle */}
@@ -378,6 +381,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <CompanyFirstAccessOnboarding />
       </div>
       <ActivityFeedPanel open={feedOpen} onClose={() => setFeedOpen(false)} />
+      <QuickActionModal kind={quickAction} onClose={() => setQuickAction(null)} />
       {(isAdmin || Boolean(activeCompanyId)) && <InviteUserDialog open={inviteOpen} onOpenChange={setInviteOpen} mode={inviteMode} initialCompanyId={activeCompanyId} />}
     </div>
   );

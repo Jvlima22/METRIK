@@ -14,8 +14,11 @@ import { Route as AcceptInviteRouteImport } from './routes/accept-invite'
 import { Route as AiAdsRouteImport } from './routes/ai-ads'
 import { Route as CompanyOnboardingRouteImport } from './routes/company-onboarding'
 import { Route as CompanySettingsRouteImport } from './routes/company-settings'
+import { Route as ComplianceRouteImport } from './routes/compliance'
 import { Route as CreativesRouteImport } from './routes/creatives'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as DocumentsRouteImport } from './routes/documents'
+import { Route as HelpRouteImport } from './routes/help'
 import { Route as HubRouteImport } from './routes/hub'
 import { Route as JobsRouteImport } from './routes/jobs'
 import { Route as LoginRouteImport } from './routes/login'
@@ -51,6 +54,11 @@ const CompanySettingsRoute = CompanySettingsRouteImport.update({
   path: '/company-settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ComplianceRoute = ComplianceRouteImport.update({
+  id: '/compliance',
+  path: '/compliance',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CreativesRoute = CreativesRouteImport.update({
   id: '/creatives',
   path: '/creatives',
@@ -59,6 +67,16 @@ const CreativesRoute = CreativesRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocumentsRoute = DocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HelpRoute = HelpRouteImport.update({
+  id: '/help',
+  path: '/help',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HubRoute = HubRouteImport.update({
@@ -113,8 +131,11 @@ export interface FileRoutesByFullPath {
   '/ai-ads': typeof AiAdsRoute
   '/company-onboarding': typeof CompanyOnboardingRoute
   '/company-settings': typeof CompanySettingsRoute
+  '/compliance': typeof ComplianceRoute
   '/creatives': typeof CreativesRoute
   '/dashboard': typeof DashboardRoute
+  '/documents': typeof DocumentsRoute
+  '/help': typeof HelpRoute
   '/hub': typeof HubRoute
   '/jobs': typeof JobsRoute
   '/login': typeof LoginRoute
@@ -131,8 +152,11 @@ export interface FileRoutesByTo {
   '/ai-ads': typeof AiAdsRoute
   '/company-onboarding': typeof CompanyOnboardingRoute
   '/company-settings': typeof CompanySettingsRoute
+  '/compliance': typeof ComplianceRoute
   '/creatives': typeof CreativesRoute
   '/dashboard': typeof DashboardRoute
+  '/documents': typeof DocumentsRoute
+  '/help': typeof HelpRoute
   '/hub': typeof HubRoute
   '/jobs': typeof JobsRoute
   '/login': typeof LoginRoute
@@ -150,8 +174,11 @@ export interface FileRoutesById {
   '/ai-ads': typeof AiAdsRoute
   '/company-onboarding': typeof CompanyOnboardingRoute
   '/company-settings': typeof CompanySettingsRoute
+  '/compliance': typeof ComplianceRoute
   '/creatives': typeof CreativesRoute
   '/dashboard': typeof DashboardRoute
+  '/documents': typeof DocumentsRoute
+  '/help': typeof HelpRoute
   '/hub': typeof HubRoute
   '/jobs': typeof JobsRoute
   '/login': typeof LoginRoute
@@ -170,8 +197,11 @@ export interface FileRouteTypes {
     | '/ai-ads'
     | '/company-onboarding'
     | '/company-settings'
+    | '/compliance'
     | '/creatives'
     | '/dashboard'
+    | '/documents'
+    | '/help'
     | '/hub'
     | '/jobs'
     | '/login'
@@ -188,8 +218,11 @@ export interface FileRouteTypes {
     | '/ai-ads'
     | '/company-onboarding'
     | '/company-settings'
+    | '/compliance'
     | '/creatives'
     | '/dashboard'
+    | '/documents'
+    | '/help'
     | '/hub'
     | '/jobs'
     | '/login'
@@ -206,8 +239,11 @@ export interface FileRouteTypes {
     | '/ai-ads'
     | '/company-onboarding'
     | '/company-settings'
+    | '/compliance'
     | '/creatives'
     | '/dashboard'
+    | '/documents'
+    | '/help'
     | '/hub'
     | '/jobs'
     | '/login'
@@ -225,8 +261,11 @@ export interface RootRouteChildren {
   AiAdsRoute: typeof AiAdsRoute
   CompanyOnboardingRoute: typeof CompanyOnboardingRoute
   CompanySettingsRoute: typeof CompanySettingsRoute
+  ComplianceRoute: typeof ComplianceRoute
   CreativesRoute: typeof CreativesRoute
   DashboardRoute: typeof DashboardRoute
+  DocumentsRoute: typeof DocumentsRoute
+  HelpRoute: typeof HelpRoute
   HubRoute: typeof HubRoute
   JobsRoute: typeof JobsRoute
   LoginRoute: typeof LoginRoute
@@ -275,6 +314,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CompanySettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/compliance': {
+      id: '/compliance'
+      path: '/compliance'
+      fullPath: '/compliance'
+      preLoaderRoute: typeof ComplianceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/creatives': {
       id: '/creatives'
       path: '/creatives'
@@ -287,6 +333,20 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/documents': {
+      id: '/documents'
+      path: '/documents'
+      fullPath: '/documents'
+      preLoaderRoute: typeof DocumentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/help': {
+      id: '/help'
+      path: '/help'
+      fullPath: '/help'
+      preLoaderRoute: typeof HelpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hub': {
@@ -361,8 +421,11 @@ const rootRouteChildren: RootRouteChildren = {
   AiAdsRoute: AiAdsRoute,
   CompanyOnboardingRoute: CompanyOnboardingRoute,
   CompanySettingsRoute: CompanySettingsRoute,
+  ComplianceRoute: ComplianceRoute,
   CreativesRoute: CreativesRoute,
   DashboardRoute: DashboardRoute,
+  DocumentsRoute: DocumentsRoute,
+  HelpRoute: HelpRoute,
   HubRoute: HubRoute,
   JobsRoute: JobsRoute,
   LoginRoute: LoginRoute,
