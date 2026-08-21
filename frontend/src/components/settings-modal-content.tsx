@@ -36,6 +36,7 @@ export function SettingsModalContent() {
   const [browserNotifications, setBrowserNotifications] = useState(() => readPreference("metrik:browser-notifications", "true") === "true");
   const [compactDensity, setCompactDensity] = useState(() => readPreference<string>("metrik:compact-density", "false") === "true");
   const [companyName, setCompanyName] = useState<string | null>(null);
+  const [notificationMessage, setNotificationMessage] = useState<string | null>(null);
   const { user, isAdmin } = useAuth();
   const { activeAccount, activeCompanyId } = useAccount();
   const active = sections.find((section) => section.id === activeSection) ?? sections[0];
@@ -56,7 +57,26 @@ export function SettingsModalContent() {
 
   useEffect(() => {
     window.localStorage.setItem("metrik:compact-density", String(compactDensity));
+    document.documentElement.classList.toggle("density-compact", compactDensity);
+    return () => document.documentElement.classList.remove("density-compact");
   }, [compactDensity]);
+
+  async function handleBrowserNotifications(value: boolean) {
+    setNotificationMessage(null);
+    if (!value) {
+      setBrowserNotifications(false);
+      return;
+    }
+    if (!("Notification" in window)) {
+      setBrowserNotifications(false);
+      setNotificationMessage("Seu navegador não oferece notificações.");
+      return;
+    }
+    const permission = Notification.permission === "default" ? await Notification.requestPermission() : Notification.permission;
+    const granted = permission === "granted";
+    setBrowserNotifications(granted);
+    setNotificationMessage(granted ? "Notificações ativadas neste navegador." : "Permissão de notificações recusada pelo navegador.");
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -98,7 +118,7 @@ export function SettingsModalContent() {
           <section className="rounded-2xl border border-slate-200 p-5"><div className="flex items-start gap-3"><div className="flex size-10 items-center justify-center rounded-xl bg-violet-50 text-violet-600"><SlidersHorizontal className="size-5" /></div><div><h3 className="text-sm font-semibold text-slate-900">Aparência</h3><p className="mt-1 text-xs text-slate-500">Personalize como o Metrik aparece para você.</p></div></div>
             <div className="mt-5"><p className="text-xs font-medium text-slate-800">Tema</p><div className="mt-2 grid grid-cols-3 gap-2"><ThemeButton icon={Sun} label="Claro" selected={theme === "light"} onClick={() => updateTheme("light")} /><ThemeButton icon={Moon} label="Escuro" selected={theme === "dark"} onClick={() => updateTheme("dark")} /><ThemeButton icon={Monitor} label="Automático" selected={theme === "system"} onClick={() => updateTheme("system")} /></div></div>
           </section>
-          <section className="rounded-2xl border border-slate-200 p-5"><h3 className="text-sm font-semibold text-slate-900">Preferências de experiência</h3><p className="mt-1 text-xs text-slate-500">Ajuste como você recebe informações e navega pela plataforma.</p><PreferenceRow label="Notificações do navegador" description="Receba avisos quando houver uma atualização importante." checked={browserNotifications} onChange={setBrowserNotifications} /><PreferenceRow label="Densidade compacta" description="Use mais informações na mesma área da tela." checked={compactDensity} onChange={setCompactDensity} /></section>
+          <section className="rounded-2xl border border-slate-200 p-5"><h3 className="text-sm font-semibold text-slate-900">Preferências de experiência</h3><p className="mt-1 text-xs text-slate-500">Ajuste como você recebe informações e navega pela plataforma.</p><PreferenceRow label="Notificações do navegador" description="Receba avisos quando houver uma atualização importante." checked={browserNotifications} onChange={(value) => void handleBrowserNotifications(value)} />{notificationMessage && <p className="mt-3 text-[11px] text-slate-500">{notificationMessage}</p>}<PreferenceRow label="Densidade compacta" description="Use mais informações na mesma área da tela." checked={compactDensity} onChange={setCompactDensity} /></section>
           <section className="rounded-2xl border border-slate-200 bg-slate-50/70 p-5"><p className="text-[10px] font-semibold uppercase tracking-wider text-violet-600">Contexto ativo</p><h3 className="mt-1 text-base font-semibold text-slate-900">{selectedCompanyName}</h3><p className="mt-1 text-xs text-slate-500">As métricas, integrações e configurações exibidas respeitam esta empresa.</p></section>
         </div>}
 
