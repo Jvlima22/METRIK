@@ -1,20 +1,15 @@
 import { useNavigate } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import {
-  Bell,
   Building2,
   CreditCard,
   FileText,
   HelpCircle,
-  Home,
   LogOut,
   Settings2,
   ShieldCheck,
-  Sparkles,
   UserPlus,
   UserRound,
-  Users,
-  Workflow,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -49,7 +44,7 @@ function MenuRow({ icon: Icon, children, onSelect, destructive = false }: { icon
 export function ProfileNavigationSheet({ collapsed, displayName, avatarUrl, onInviteMember, onInviteCompany }: ProfileNavigationDropdownProps) {
   const navigate = useNavigate();
   const { user, isAdmin, signOut } = useAuth();
-  const { activeAccount, activeCompanyId } = useAccount();
+  const { activeCompanyId } = useAccount();
   const { currentPlan } = usePlan();
   const planLabel = currentPlan ? currentPlan.charAt(0).toUpperCase() + currentPlan.slice(1) : "Nenhum plano ativo";
   const initials = displayName.slice(0, 2).toUpperCase();
@@ -87,7 +82,6 @@ export function ProfileNavigationSheet({ collapsed, displayName, avatarUrl, onIn
 
         <DropdownMenuSeparator />
         <MenuRow icon={UserRound} onSelect={() => go("/company-settings")}>Conta</MenuRow>
-        <MenuRow icon={Sparkles} onSelect={() => go("/ai-ads")}>Personalização e IA</MenuRow>
         <MenuRow icon={Settings2} onSelect={() => go("/company-settings")}>Configurações</MenuRow>
 
         {(onInviteMember || onInviteCompany) && <>
@@ -97,10 +91,6 @@ export function ProfileNavigationSheet({ collapsed, displayName, avatarUrl, onIn
         </>}
 
         <DropdownMenuSeparator />
-        <MenuRow icon={Home} onSelect={() => go("/dashboard")}>Página inicial</MenuRow>
-        <MenuRow icon={Workflow} onSelect={() => go("/integrations")}>Integrações e contas de anúncios</MenuRow>
-        <MenuRow icon={Bell} onSelect={() => go("/dashboard")}>Notificações</MenuRow>
-        {isAdmin && <MenuRow icon={Users} onSelect={() => go("/dashboard")}>Empresas clientes</MenuRow>}
         <MenuRow icon={ShieldCheck} onSelect={() => go("/violations")}>Compliance</MenuRow>
 
         <DropdownMenuSeparator />
