@@ -17,7 +17,7 @@ import { ManageProvider } from "../lib/manage-store";
 import { PlanProvider } from "../lib/plan-context";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
-import { FaviconSync, ThemeSync } from "@/lib/favicon-sync";
+import { FaviconSync } from "@/lib/favicon-sync";
 import "@fontsource/space-grotesk/400.css";
 import "@fontsource/space-grotesk/600.css";
 import "@fontsource/space-grotesk/700.css";
@@ -150,7 +150,6 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeSync />
       <FaviconSync />
       <AuthProvider>
         <AccountProvider>
