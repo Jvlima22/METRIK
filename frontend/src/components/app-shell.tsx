@@ -253,7 +253,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
         <ProfileNavigationSheet
           collapsed={collapsed}
-          displayName={activeAccount.companyName ?? activeAccount.name ?? user?.email?.split("@")[0] ?? "Minha conta"}
+          displayName={activeAccount.name ?? activeAccount.companyName ?? user?.email?.split("@")[0] ?? "Minha conta"}
           avatarUrl={activeCompanyLogo ?? activeAccount.logoUrl}
           onInviteMember={isAdmin || Boolean(activeCompanyId) ? () => { setInviteMode('MEMBER'); setInviteOpen(true); } : undefined}
           onInviteCompany={isAdmin ? () => { setInviteMode('COMPANY'); setInviteOpen(true); } : undefined}

@@ -60,8 +60,11 @@ export function ProfileNavigationSheet({ collapsed, displayName, avatarUrl, onIn
       <DropdownMenuTrigger asChild>
         <button type="button" className={cn("flex items-center rounded-xl bg-accent/60 text-left transition-colors hover:bg-accent", collapsed ? "mx-auto size-9 justify-center" : "m-3 w-[calc(100%-1.5rem)] gap-2.5 p-3")} aria-label="Abrir perfil e opções">
           {avatarUrl ? <img src={avatarUrl} alt={`Logo da ${displayName}`} className="size-8 shrink-0 rounded-lg object-contain" /> : <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-cyan-500 text-[10px] font-bold text-white">{initials}</div>}
-          {!collapsed && <span className="min-w-0 flex-1 truncate text-xs font-semibold text-foreground">{displayName}</span>}
-          {!collapsed && <span className="text-[10px] text-muted-foreground">{isAdmin ? "Admin" : "Conta"}</span>}
+          {!collapsed && <span className="min-w-0 flex-1">
+            <span className="block truncate text-xs font-semibold text-foreground">{displayName}</span>
+            <span className="block truncate text-[10px] text-muted-foreground">{user?.email ?? "Conta Metrik"}</span>
+          </span>}
+          {!collapsed && <span className="shrink-0 text-[10px] text-muted-foreground">{isAdmin ? "Admin" : "Conta"}</span>}
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" side="top" sideOffset={8} className="w-72 rounded-2xl p-2">
