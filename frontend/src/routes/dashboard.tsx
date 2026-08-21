@@ -127,7 +127,7 @@ async function exportNodeAsImage(node: HTMLElement, format: "png" | "jpg", filen
     wrapper.remove();
   }
 }
-const PIE_COLORS = ["#6d28d9", "#2563eb", "#06b6d4"];
+const PIE_COLORS = ["#4B97DB", "#2563eb", "#06b6d4"];
 
 /** YYYY-MM-DD de N dias atrás — default do filtro de data (alinhado ao mockTrend). */
 function isoDaysAgo(n: number): string {
@@ -483,7 +483,7 @@ function DashboardPage() {
                 <p className="text-xs text-muted-foreground mt-0.5">Cruzando mídia paga com sinais sociais · 14 dias</p>
               </div>
               <div className="flex items-center gap-3 text-xs">
-                <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-[#6d28d9]" />Impressões</span>
+                <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-[#4B97DB]" />Impressões</span>
                 <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-[#06b6d4]" />Cliques</span>
                 <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-[#f43f5e]" />Engajamento</span>
                 <div data-export-ignore="true" className="flex items-center gap-1.5 sm:ml-2">
@@ -500,8 +500,8 @@ function DashboardPage() {
               <ComposedChart data={filteredTrend} margin={{ left: -10, right: 8, top: 8 }}>
                 <defs>
                   <linearGradient id="gradImp" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#6d28d9" stopOpacity={0.25} />
-                    <stop offset="100%" stopColor="#6d28d9" stopOpacity={0} />
+                    <stop offset="0%" stopColor="#4B97DB" stopOpacity={0.25} />
+                    <stop offset="100%" stopColor="#4B97DB" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="gradClk" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#06b6d4" stopOpacity={0.25} />
@@ -513,7 +513,7 @@ function DashboardPage() {
                 <YAxis yAxisId="impressions" stroke="#9aa3b2" fontSize={11} tickLine={false} axisLine={false} />
                 <YAxis yAxisId="secondary" orientation="right" stroke="#9aa3b2" fontSize={10} tickLine={false} axisLine={false} width={42} />
                 <Tooltip contentStyle={{ background: "#fff", border: "1px solid #e6e8ef", borderRadius: 10, fontSize: 12, boxShadow: "0 8px 24px rgba(15,18,40,0.08)" }} />
-                <Area yAxisId="impressions" type="monotone" dataKey="impressions" stroke="#6d28d9" strokeWidth={2} fill="url(#gradImp)" />
+                <Area yAxisId="impressions" type="monotone" dataKey="impressions" stroke="#4B97DB" strokeWidth={2} fill="url(#gradImp)" />
                 <Line yAxisId="secondary" type="monotone" dataKey="clicks" stroke="#06b6d4" strokeWidth={2.5} dot={false} activeDot={{ r: 4 }} />
                 <Line yAxisId="secondary" type="monotone" dataKey="engagement" stroke="#f43f5e" strokeWidth={2.5} dot={false} activeDot={{ r: 4 }} />
               </ComposedChart>
@@ -557,7 +557,7 @@ function DashboardPage() {
               <CartesianGrid strokeDasharray="3 3" stroke="#eef0f5" vertical={false} />
               <XAxis dataKey="name" stroke="#9aa3b2" fontSize={11} tickLine={false} axisLine={false} />
               <Tooltip contentStyle={{ background: "#fff", border: "1px solid #e6e8ef", borderRadius: 10, fontSize: 12 }} />
-              <Bar dataKey="custo" fill="#6d28d9" radius={[6, 6, 0, 0]} maxBarSize={36} />
+              <Bar dataKey="custo" fill="#4B97DB" radius={[6, 6, 0, 0]} maxBarSize={36} />
               <Bar dataKey="conversoes" fill="#06b6d4" radius={[6, 6, 0, 0]} maxBarSize={36} />
             </BarChart>
           </ResponsiveContainer>

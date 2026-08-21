@@ -138,15 +138,15 @@ function CampaignDetail() {
                 <AreaChart data={trend} margin={{ left: -10, right: 8 }}>
                   <defs>
                     <linearGradient id="gImp" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#6d28d9" stopOpacity={0.3} />
-                      <stop offset="100%" stopColor="#6d28d9" stopOpacity={0} />
+                      <stop offset="0%" stopColor="#4B97DB" stopOpacity={0.3} />
+                      <stop offset="100%" stopColor="#4B97DB" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#eef0f5" vertical={false} />
                   <XAxis dataKey="date" stroke="#9aa3b2" fontSize={11} tickLine={false} axisLine={false} />
                   <YAxis stroke="#9aa3b2" fontSize={11} tickLine={false} axisLine={false} />
                   <Tooltip contentStyle={{ background: "#fff", border: "1px solid #e6e8ef", borderRadius: 10, fontSize: 12 }} />
-                  <Area type="monotone" dataKey="impressions" stroke="#6d28d9" strokeWidth={2.5} fill="url(#gImp)" />
+                  <Area type="monotone" dataKey="impressions" stroke="#4B97DB" strokeWidth={2.5} fill="url(#gImp)" />
                 </AreaChart>
               </ResponsiveContainer>
             </GlassCard>
@@ -206,7 +206,7 @@ function CampaignDetail() {
                     <p className="text-xs text-muted-foreground">{q.label}</p>
                     <p className="text-3xl font-display font-bold mt-1">{q.score}<span className="text-base text-muted-foreground">/10</span></p>
                     <div className="h-1.5 bg-white rounded-full overflow-hidden mt-3">
-                      <div className="h-full rounded-full" style={{ width: `${q.score * 10}%`, background: "linear-gradient(90deg, #6d28d9, #06b6d4)" }} />
+                      <div className="h-full rounded-full" style={{ width: `${q.score * 10}%`, background: "linear-gradient(90deg, #4B97DB, #06b6d4)" }} />
                     </div>
                   </div>
                 ))}

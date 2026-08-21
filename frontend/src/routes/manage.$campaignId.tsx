@@ -242,7 +242,7 @@ function ManageDetail() {
                       contentStyle={{ borderRadius: 12, border: "1px solid rgba(0,0,0,0.08)", fontSize: 12 }}
                       formatter={(v: number, name) => (name === "spend" ? [`R$ ${formatNumber(v)}`, "Gasto"] : [formatNumber(v), "Conversões"])}
                     />
-                    <Bar yAxisId="left" dataKey="spend" fill="#7c3aed" radius={[4, 4, 0, 0]} maxBarSize={22} />
+                    <Bar yAxisId="left" dataKey="spend" fill="#4B97DB" radius={[4, 4, 0, 0]} maxBarSize={22} />
                     <Line yAxisId="right" type="monotone" dataKey="conversions" stroke="#06b6d4" strokeWidth={2.5} dot={false} />
                   </ComposedChart>
                 </ResponsiveContainer>

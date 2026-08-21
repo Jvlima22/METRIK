@@ -30,5 +30,5 @@ export const integrationCatalog: IntegrationDefinition[] = [
   { id: "pipedrive", name: "Pipedrive", category: "CRM", description: "Negócios, contatos, leads e atividades.", accent: "#ef6c35", capabilities: ["Negócios", "Leads", "Webhooks"], auth: "OAUTH" },
   { id: "google-ads", name: "Google Ads", category: "ADS", description: "Campanhas, métricas e anúncios.", accent: "#4285f4", capabilities: ["Métricas", "Campanhas", "Criativos"], auth: "OAUTH" },
   { id: "meta-ads", name: "Meta Ads", category: "ADS", description: "Campanhas e públicos da Meta.", accent: "#1877f2", capabilities: ["Métricas", "Campanhas", "Públicos"], auth: "OAUTH" },
-  { id: "custom-api", name: "API personalizada", category: "CUSTOM", description: "Conecte qualquer sistema REST ou webhook.", accent: "#7c3aed", capabilities: ["REST", "Webhook", "Transformação"], auth: "CUSTOM" },
+  { id: "custom-api", name: "API personalizada", category: "CUSTOM", description: "Conecte qualquer sistema REST ou webhook.", accent: "#4B97DB", capabilities: ["REST", "Webhook", "Transformação"], auth: "CUSTOM" },
 ];

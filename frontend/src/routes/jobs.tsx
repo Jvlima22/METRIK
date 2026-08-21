@@ -35,7 +35,7 @@ const stages: { key: StageKey; label: string; icon: any; tone: string }[] = [
 
 const processSteps: { title: string; detail: string; icon: typeof Webhook; bg: string; text: string }[] = [
   { title: "1. Webhook recebido", detail: "POST /webhook/violation com o payload (tenantId, adId, platform). Zod valida e a API responde 202.", icon: Webhook, bg: "bg-violet-100", text: "text-violet-600" },
-  { title: "2. Idempotência", detail: "Job entra na fila com jobId = tenantId__adId. Duplicata em waiting/active devolve 409.", icon: Fingerprint, bg: "bg-fuchsia-100", text: "text-fuchsia-600" },
+  { title: "2. Idempotência", detail: "Job entra na fila com jobId = tenantId__adId. Duplicata em waiting/active devolve 409.", icon: Fingerprint, bg: "bg-violet-100", text: "text-violet-600" },
   { title: "3. Fila BullMQ", detail: "O job aguarda na fila (Redis). O worker roda no mesmo processo e consome quando livre.", icon: Inbox, bg: "bg-cyan-100", text: "text-cyan-600" },
   { title: "4. Worker + Adapter", detail: "Seleciona o adapter pela plataforma (Strategy: Google/Meta) e executa o takedown no SDK, com timeout.", icon: Cog, bg: "bg-amber-100", text: "text-amber-600" },
   { title: "5. Retry / backoff", detail: "Qualquer exceção reentra na fila — 3 tentativas com backoff exponencial até confirmar ou falhar.", icon: RefreshCw, bg: "bg-orange-100", text: "text-orange-600" },
