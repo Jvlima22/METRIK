@@ -106,36 +106,45 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
   const { activeAccount, activeCompanyId } = useAccount();
   const [activeCompanyLogo, setActiveCompanyLogo] = useState<string | null>(null);
+  const [activeCompanyName, setActiveCompanyName] = useState<string | null>(null);
   const unread = isAdmin && activeAccount.companyId?.startsWith('mock-') === true ? activityFeed.filter((e) => e.kind === "violation" || e.kind === "auto_pause").length : 0;
 
   useEffect(() => {
     if (!activeCompanyId) {
       setActiveCompanyLogo(null);
+      setActiveCompanyName(null);
       return;
     }
     let cancelled = false;
     const cacheKey = `metrik:company-logo:${activeCompanyId}`;
+    const nameCacheKey = `metrik:company-name:${activeCompanyId}`;
     let cachedLogo: string | null = null;
+    let cachedName: string | null = null;
     try {
       cachedLogo = localStorage.getItem(cacheKey);
-      if (!cancelled) setActiveCompanyLogo(cachedLogo);
+      cachedName = localStorage.getItem(nameCacheKey);
+      if (!cancelled) { setActiveCompanyLogo(cachedLogo); setActiveCompanyName(cachedName); }
     } catch {
       /* cache opcional */
     }
-    void apiFetch<{ data?: { logo_url?: string | null } }>("/company-profile")
+    void apiFetch<{ data?: { name?: string | null; logo_url?: string | null } }>("/company-profile")
       .then(({ data }) => {
         if (cancelled) return;
         const logoUrl = data?.logo_url ?? null;
+        const companyName = data?.name?.trim() || null;
         setActiveCompanyLogo(logoUrl);
+        setActiveCompanyName(companyName);
         try {
           if (logoUrl) localStorage.setItem(cacheKey, logoUrl);
           else localStorage.removeItem(cacheKey);
+          if (companyName) localStorage.setItem(nameCacheKey, companyName);
+          else localStorage.removeItem(nameCacheKey);
         } catch {
           /* cache opcional */
         }
       })
       .catch(() => {
-        if (!cancelled && !cachedLogo) setActiveCompanyLogo(null);
+        if (!cancelled) { if (!cachedLogo) setActiveCompanyLogo(null); if (!cachedName) setActiveCompanyName(null); }
       });
     return () => { cancelled = true; };
   }, [activeCompanyId]);
@@ -239,7 +248,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
         <ProfileNavigationSheet
           collapsed={collapsed}
-          displayName={activeAccount.name ?? activeAccount.companyName ?? user?.email?.split("@")[0] ?? "Minha conta"}
+          displayName={activeCompanyName ?? activeAccount.companyName ?? activeAccount.name ?? user?.email?.split("@")[0] ?? "Minha conta"}
           avatarUrl={activeCompanyLogo ?? activeAccount.logoUrl}
           onInviteMember={isAdmin || Boolean(activeCompanyId) ? () => { setInviteMode('MEMBER'); setInviteOpen(true); } : undefined}
           onInviteCompany={isAdmin ? () => { setInviteMode('COMPANY'); setInviteOpen(true); } : undefined}
