@@ -21,6 +21,8 @@ import { useEffect, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { apiFetch } from "@/lib/api";
 import { ActivityFeedPanel } from "@/components/activity-feed-panel";
+import { ProfileNavigationSheet, ProfileSheetTrigger } from "@/components/profile-navigation-sheet";
+
 import { AccountSwitcher } from "@/components/account-switcher";
 import { useAccount } from "@/lib/account-context";
 import { CompanyFirstAccessOnboarding } from "@/components/company-first-access-onboarding";
@@ -111,7 +113,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const { user, loading, isAuthenticated, isConfigured, isAdmin, signOut } = useAuth();
-  const [feedOpen, setFeedOpen] = useState(false);
+    const [feedOpen, setFeedOpen] = useState(false);
+  const [profileSheetOpen, setProfileSheetOpen] = useState(false);
+
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteMode, setInviteMode] = useState<'COMPANY' | 'MEMBER'>('MEMBER');
   const [collapsed, setCollapsed] = useState(false);
@@ -248,25 +252,18 @@ export function AppShell({ children }: { children: ReactNode }) {
           ))}
         </nav>
 
-        {/* Status */}
-        {collapsed ? (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="mx-auto mb-2 flex size-9 items-center justify-center rounded-xl bg-accent/60">
-                <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
-              </div>
-            </TooltipTrigger>
-            <TooltipContent side="right">API Operacional · v1.2.0</TooltipContent>
-          </Tooltip>
-        ) : (
-          <div className="m-3 p-4 rounded-xl bg-accent/60 text-xs">
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="size-1.5 rounded-full bg-emerald-500" />
-              <span className="text-foreground font-medium">API Operacional</span>
-            </div>
-            <p className="text-muted-foreground">v1.2.0 · 312ms p95</p>
-          </div>
-        )}
+        <ProfileSheetTrigger
+          collapsed={collapsed}
+          onClick={() => setProfileSheetOpen(true)}
+          displayName={activeAccount.companyName ?? activeAccount.name ?? user?.email?.split("@")[0] ?? "Minha conta"}
+          avatarUrl={activeCompanyLogo ?? activeAccount.logoUrl}
+        />
+        <ProfileNavigationSheet
+          open={profileSheetOpen}
+          onOpenChange={setProfileSheetOpen}
+          onInviteMember={isAdmin || Boolean(activeCompanyId) ? () => { setInviteMode('MEMBER'); setInviteOpen(true); } : undefined}
+          onInviteCompany={isAdmin ? () => { setInviteMode('COMPANY'); setInviteOpen(true); } : undefined}
+        />
 
         {/* Collapse toggle */}
         <button
