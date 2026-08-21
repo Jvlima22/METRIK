@@ -74,7 +74,6 @@ const navSections: { group: string; items: NavItem[] }[] = [
     group: "Conta",
     items: [
       { to: "/subscriptions", label: "Assinaturas", icon: CreditCard },
-      { to: "/company-settings", label: "Configuração", icon: Settings2, action: "settings" },
     ],
   },
 ];
