@@ -17,6 +17,7 @@ import { ManageProvider } from "../lib/manage-store";
 import { PlanProvider } from "../lib/plan-context";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
+import { FaviconSync } from "../lib/favicon-sync";
 import "@fontsource/space-grotesk/400.css";
 import "@fontsource/space-grotesk/600.css";
 import "@fontsource/space-grotesk/700.css";
@@ -113,7 +114,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         rel: "icon",
         type: "image/png",
-        href: "/logo-ilustration-white.png",
+        href: "/logo-ilustration.png?v=2",
+        media: "(prefers-color-scheme: light)",
+      },
+      {
+        rel: "icon",
+        type: "image/png",
+        href: "/logo-ilustration-white.png?v=2",
+        media: "(prefers-color-scheme: dark)",
       },
     ],
   }),
@@ -142,6 +150,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <FaviconSync />
       <AuthProvider>
         <AccountProvider>
           <PlanProvider>
