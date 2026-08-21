@@ -10,25 +10,21 @@ import companiesRoutes from './companies.routes';
 import companySignupRoutes from './company-signup.routes';
 import companyOnboardingRoutes from './company-onboarding.routes';
 import companyProfileRoutes from './company-profile.routes';
+import billingRoutes from './billing.routes';
 
 // As rotas de webhook/jobs carregam BullMQ e Redis no escopo do módulo.
 // Na Vercel, o backend HTTP não deve inicializar uma conexão Redis local
 // durante toda requisição, pois isso pode interromper rotas independentes,
 // como convites e autenticação. Essas rotas continuam disponíveis no servidor
 // persistente (Railway/local), onde o worker Redis é executado.
-const redisBackedRoutesEnabled = process.env.VERCEL !== '1';
-const webhookRoutes = redisBackedRoutesEnabled
-  ? require('./webhook.routes').default
-  : null;
-const jobsRoutes = redisBackedRoutesEnabled
+const webhookRoutes = require('./webhook.routes').default;
+const jobsRoutes = process.env.VERCEL !== '1'
   ? require('./jobs.routes').default
   : null;
 
 const router = Router();
-if (webhookRoutes && jobsRoutes) {
-  router.use('/webhook', webhookRoutes);
-  router.use('/jobs', jobsRoutes);
-}
+router.use('/webhook', webhookRoutes);
+if (jobsRoutes) router.use('/jobs', jobsRoutes);
 router.use("/metrics", metricsRoutes);
 router.use("/auth", authRoutes);
 router.use("/ai", adsIntelligenceRoutes);
@@ -40,4 +36,5 @@ router.use('/companies', companiesRoutes);
 router.use('/company-signup', companySignupRoutes);
 router.use('/company-onboarding', companyOnboardingRoutes);
 router.use('/company-profile', companyProfileRoutes);
+router.use('/billing', billingRoutes);
 export default router;

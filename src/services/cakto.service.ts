@@ -56,3 +56,7 @@ export async function listCaktoSubscriptions(search?: string): Promise<unknown> 
   return caktoRequest(`/public_api/subscriptions/${query}`);
 }
 
+export async function listCaktoBillingCycles(subscriptionId: string): Promise<unknown> {
+  return caktoRequest(`/public_api/subscriptions/${encodeURIComponent(subscriptionId)}/billing-cycles/`);
+}
+
